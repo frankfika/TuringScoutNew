@@ -22,28 +22,31 @@ model Source {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   rawEvidence     RawEvidence[]
+  jobRuns         SourceJobRun[]
 }
 
 model RawEvidence {
-  id              String      @id @default(cuid())
-  sourceId        String?
-  source          Source?     @relation(fields: [sourceId], references: [id])
-  sourceType      String
-  sourceName      String?
-  sourceUrl       String
-  discoveredAt    DateTime    @default(now())
-  fetchedAt       DateTime?
-  rawTitle        String?
-  rawTextExcerpt  String?
-  rawContentRef   String?
-  authorOrAccount String?
-  publishedAt     DateTime?
-  linkedUrls      Json?
-  language        String?
-  fetchStatus     String      @default("success")
-  checksum        String?
-  createdAt       DateTime    @default(now())
-  evidence        Evidence[]
+  id               String     @id @default(cuid())
+  sourceId         String?
+  source           Source?    @relation(fields: [sourceId], references: [id])
+  sourceType       String
+  sourceName       String?
+  sourceUrl        String
+  discoveredAt     DateTime   @default(now())
+  fetchedAt        DateTime?
+  rawTitle         String?
+  rawTextExcerpt   String?
+  rawContentRef    String?
+  authorOrAccount  String?
+  publishedAt      DateTime?
+  linkedUrls       Json?
+  language         String?
+  fetchStatus      String     @default("success")
+  checksum         String?
+  reviewStatus     String     @default("pending")
+  extractionStatus String     @default("pending")
+  createdAt        DateTime   @default(now())
+  evidence         Evidence[]
 
   @@index([sourceType])
   @@index([fetchStatus])
@@ -51,8 +54,8 @@ model RawEvidence {
 }
 
 model Project {
-  id                 String                 @id @default(cuid())
-  slug               String                 @unique
+  id                 String                   @id @default(cuid())
+  slug               String                   @unique
   name               String
   tagline            String?
   summary            String?
@@ -65,26 +68,27 @@ model Project {
   huggingFaceUrl     String?
   productHuntUrl     String?
   logoUrl            String?
-  trustLabel         String                 @default("unverified")
+  trustLabel         String                   @default("unverified")
   riskLabels         Json?
-  status             String                 @default("draft")
+  status             String                   @default("draft")
   lastCheckedAt      DateTime?
-  createdAt          DateTime               @default(now())
-  updatedAt          DateTime               @updatedAt
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
   opportunities      Opportunity[]
   evidence           Evidence[]
   creatorContent     CreatorContent[]
   githubSnapshots    GithubMetricSnapshot[]
+  acknowledgements   ProjectAcknowledgement[]
 
   @@index([status])
   @@index([category])
 }
 
 model Opportunity {
-  id                  String           @id @default(cuid())
+  id                  String            @id @default(cuid())
   projectId           String
-  project             Project          @relation(fields: [projectId], references: [id])
-  slug                String           @unique
+  project             Project           @relation(fields: [projectId], references: [id])
+  slug                String            @unique
   title               String
   summary             String?
   opportunityType     String
@@ -93,11 +97,11 @@ model Opportunity {
   taskSteps           Json?
   estimatedMinutes    Int?
   difficulty          String?
-  requiresLogin       Boolean          @default(false)
-  requiresWallet      Boolean          @default(false)
+  requiresLogin       Boolean           @default(false)
+  requiresWallet      Boolean           @default(false)
   primaryCtaUrl       String
   primaryCtaLabel     String
-  trustLabel          String           @default("ai_summary")
+  trustLabel          String            @default("ai_summary")
   riskLabels          Json?
   utilityLabels       Json?
   commercialLabel     String?
@@ -106,15 +110,16 @@ model Opportunity {
   adminScoreOverride  Float?
   adminOverrideReason String?
   whyRanked           String?
-  status              String           @default("draft")
+  status              String            @default("draft")
   reviewReason        String?
   expiresAt           DateTime?
   lastCheckedAt       DateTime?
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   evidence            Evidence[]
   creatorContent      CreatorContent[]
   outboundClicks      OutboundClick[]
+  reviewItems         ReviewQueueItem[]
 
   @@index([projectId])
   @@index([status])
@@ -170,28 +175,29 @@ model Submission {
 }
 
 model Creator {
-  id             String           @id @default(cuid())
-  displayName    String
-  handle         String?
-  platform       String?
-  profileUrl     String?
-  avatarUrl      String?
-  role           String?
-  status         String           @default("pending")
-  qualityScore   Int?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  creatorContent CreatorContent[]
+  id               String                   @id @default(cuid())
+  displayName      String
+  handle           String?
+  platform         String?
+  profileUrl       String?
+  avatarUrl        String?
+  role             String?
+  status           String                   @default("pending")
+  qualityScore     Int?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  creatorContent   CreatorContent[]
+  acknowledgements ProjectAcknowledgement[]
 }
 
 model CreatorContent {
-  id                String       @id @default(cuid())
+  id                String                   @id @default(cuid())
   creatorId         String?
-  creator           Creator?     @relation(fields: [creatorId], references: [id])
+  creator           Creator?                 @relation(fields: [creatorId], references: [id])
   projectId         String?
-  project           Project?     @relation(fields: [projectId], references: [id])
+  project           Project?                 @relation(fields: [projectId], references: [id])
   opportunityId     String?
-  opportunity       Opportunity? @relation(fields: [opportunityId], references: [id])
+  opportunity       Opportunity?             @relation(fields: [opportunityId], references: [id])
   contentUrl        String
   platform          String?
   contentType       String
@@ -201,10 +207,11 @@ model CreatorContent {
   publicCreditLabel String?
   qualityLabel      String?
   riskLabels        Json?
-  isSponsored       Boolean      @default(false)
-  status            String       @default("pending")
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  isSponsored       Boolean                  @default(false)
+  acknowledgements  ProjectAcknowledgement[]
+  status            String                   @default("pending")
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
 
   @@index([status])
   @@index([projectId])
@@ -226,58 +233,117 @@ model ScoreSnapshot {
 }
 
 model OutboundClick {
-  id             String       @id @default(cuid())
-  opportunityId  String?
-  opportunity    Opportunity? @relation(fields: [opportunityId], references: [id])
-  projectId      String?
-  targetUrl      String
-  ctaType        String?
-  sourceModule   String?
-  category       String?
-  visitorIdHash  String?
-  sessionIdHash  String?
-  isSponsored    Boolean      @default(false)
-  createdAt      DateTime     @default(now())
+  id            String       @id @default(cuid())
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+  projectId     String?
+  targetUrl     String
+  ctaType       String?
+  sourceModule  String?
+  category      String?
+  visitorIdHash String?
+  sessionIdHash String?
+  isSponsored   Boolean      @default(false)
+  createdAt     DateTime     @default(now())
 
   @@index([opportunityId])
   @@index([createdAt])
 }
 
 model AnalyticsEvent {
-  id             String   @id @default(cuid())
-  eventName      String
-  opportunityId  String?
-  projectId      String?
-  creatorId      String?
-  sourceModule   String?
-  targetUrl      String?
-  ctaType        String?
-  category       String?
-  props          Json?
-  visitorIdHash  String?
-  sessionIdHash  String?
-  createdAt      DateTime @default(now())
+  id            String   @id @default(cuid())
+  eventName     String
+  opportunityId String?
+  projectId     String?
+  creatorId     String?
+  sourceModule  String?
+  targetUrl     String?
+  ctaType       String?
+  category      String?
+  props         Json?
+  visitorIdHash String?
+  sessionIdHash String?
+  createdAt     DateTime @default(now())
 
   @@index([eventName])
   @@index([createdAt])
 }
 
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("owner")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ReviewQueueItem {
+  id            String       @id @default(cuid())
+  entityType    String
+  entityId      String
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+  priority      String       @default("medium")
+  reason        String
+  status        String       @default("open")
+  assignedTo    String?
+  createdAt     DateTime     @default(now())
+  resolvedAt    DateTime?
+
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([priority])
+}
+
+model SourceJobRun {
+  id                 String    @id @default(cuid())
+  sourceId           String
+  source             Source    @relation(fields: [sourceId], references: [id])
+  jobType            String    @default("manual")
+  status             String    @default("queued")
+  startedAt          DateTime?
+  finishedAt         DateTime?
+  rawEvidenceCreated Int       @default(0)
+  candidatesCreated  Int       @default(0)
+  errorMessage       String?
+  createdAt          DateTime  @default(now())
+
+  @@index([sourceId])
+  @@index([status])
+}
+
+model ProjectAcknowledgement {
+  id                  String          @id @default(cuid())
+  projectId           String
+  project             Project         @relation(fields: [projectId], references: [id])
+  creatorContentId    String?
+  creatorContent      CreatorContent? @relation(fields: [creatorContentId], references: [id])
+  acknowledgementType String
+  sourceUrl           String
+  note                String?
+  createdAt           DateTime        @default(now())
+  creator             Creator?        @relation(fields: [creatorId], references: [id])
+  creatorId           String?
+
+  @@index([projectId])
+}
+
 model GithubMetricSnapshot {
-  id            String   @id @default(cuid())
-  projectId     String
-  project       Project  @relation(fields: [projectId], references: [id])
-  repoUrl       String
-  stars         Int?
-  forks         Int?
-  watchers      Int?
-  openIssues    Int?
-  pullRequests  Int?
-  contributors  Int?
-  releases      Int?
-  topics        Json?
-  license       String?
-  lastPushedAt  DateTime?
-  capturedAt    DateTime @default(now())
+  id           String    @id @default(cuid())
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id])
+  repoUrl      String
+  stars        Int?
+  forks        Int?
+  watchers     Int?
+  openIssues   Int?
+  pullRequests Int?
+  contributors Int?
+  releases     Int?
+  topics       Json?
+  license      String?
+  lastPushedAt DateTime?
+  capturedAt   DateTime  @default(now())
 
   @@index([projectId])
 }

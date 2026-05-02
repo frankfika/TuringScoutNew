@@ -32,6 +32,21 @@ npm run build
 npm run db:reset
 ```
 
+
+## Admin / V1 Operations
+
+Admin is available at `http://localhost:3000/admin`. For local development, set `ADMIN_PASSWORD` in `.env`; if unset, the app uses `turingscout-admin`.
+
+V1 operational flows now include:
+
+- Source registry: create sources and run a safe source pilot from `/admin/sources`
+- Raw evidence: import URLs, store provenance, and extract reviewable AI drafts from `/admin/raw-evidence`
+- Review queue: publish or reject draft opportunities from `/admin/review`
+- Scoring: recalculate organic scores from `/admin` without mixing sponsored labels into ranking
+- Analytics: inspect events and outbound clicks from `/admin/analytics`
+
+The seed creates 60 published opportunities, 100 raw evidence records, 25 visible creator-content credits, 5 visible scouts, and 1 source-job/review-queue pilot candidate.
+
 ## Current Direction
 
 V1 is intentionally narrow:

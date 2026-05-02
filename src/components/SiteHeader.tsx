@@ -5,6 +5,7 @@ const nav = [
   ["Scouts", "/scouts"],
   ["Methodology", "/methodology"],
   ["Submit", "/submit"],
+  ["Admin", "/admin"],
 ];
 
 export function SiteHeader() {
