@@ -2,6 +2,36 @@
 
 TuringScout is an AI opportunity and adoption leaderboard: a lightweight, AI-automated, OPC-style platform that helps users discover AI projects worth trying and helps projects earn real attention, usage, and developer adoption.
 
+## Current App
+
+This repo now includes a runnable V1 MVP slice:
+
+- Next.js App Router + TypeScript + Tailwind CSS
+- Prisma + SQLite local development database
+- Evidence-first public pages for home, leaderboards, opportunities, projects, scouts, methodology, and submit/correction
+- Seed data for 4 initial categories and source-backed published opportunities
+- Public APIs for opportunities, project details, submissions, analytics events, and tracked outbound redirects
+
+## Quick Start
+
+```bash
+npm install
+cp .env.example .env
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+Useful commands:
+
+```bash
+npm run lint
+npm run build
+npm run db:reset
+```
+
 ## Current Direction
 
 V1 is intentionally narrow:

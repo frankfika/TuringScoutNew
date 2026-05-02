@@ -1,0 +1,283 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Source {
+  id              String         @id @default(cuid())
+  name            String
+  sourceType      String
+  urlOrQuery      String
+  categoryHint    String?
+  priority        String         @default("medium")
+  frequency       String         @default("manual")
+  fetchMethod     String         @default("manual")
+  allowedUseNotes String?
+  enabled         Boolean        @default(true)
+  lastCheckedAt   DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  rawEvidence     RawEvidence[]
+}
+
+model RawEvidence {
+  id              String      @id @default(cuid())
+  sourceId        String?
+  source          Source?     @relation(fields: [sourceId], references: [id])
+  sourceType      String
+  sourceName      String?
+  sourceUrl       String
+  discoveredAt    DateTime    @default(now())
+  fetchedAt       DateTime?
+  rawTitle        String?
+  rawTextExcerpt  String?
+  rawContentRef   String?
+  authorOrAccount String?
+  publishedAt     DateTime?
+  linkedUrls      Json?
+  language        String?
+  fetchStatus     String      @default("success")
+  checksum        String?
+  createdAt       DateTime    @default(now())
+  evidence        Evidence[]
+
+  @@index([sourceType])
+  @@index([fetchStatus])
+  @@index([checksum])
+}
+
+model Project {
+  id                 String                 @id @default(cuid())
+  slug               String                 @unique
+  name               String
+  tagline            String?
+  summary            String?
+  category           String?
+  tags               Json?
+  officialWebsiteUrl String?
+  githubUrl          String?
+  docsUrl            String?
+  blogUrl            String?
+  huggingFaceUrl     String?
+  productHuntUrl     String?
+  logoUrl            String?
+  trustLabel         String                 @default("unverified")
+  riskLabels         Json?
+  status             String                 @default("draft")
+  lastCheckedAt      DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  opportunities      Opportunity[]
+  evidence           Evidence[]
+  creatorContent     CreatorContent[]
+  githubSnapshots    GithubMetricSnapshot[]
+
+  @@index([status])
+  @@index([category])
+}
+
+model Opportunity {
+  id                  String           @id @default(cuid())
+  projectId           String
+  project             Project          @relation(fields: [projectId], references: [id])
+  slug                String           @unique
+  title               String
+  summary             String?
+  opportunityType     String
+  rewardType          String?
+  rewardDescription   String?
+  taskSteps           Json?
+  estimatedMinutes    Int?
+  difficulty          String?
+  requiresLogin       Boolean          @default(false)
+  requiresWallet      Boolean          @default(false)
+  primaryCtaUrl       String
+  primaryCtaLabel     String
+  trustLabel          String           @default("ai_summary")
+  riskLabels          Json?
+  utilityLabels       Json?
+  commercialLabel     String?
+  sourceConfidence    Int?
+  organicScore        Float?
+  adminScoreOverride  Float?
+  adminOverrideReason String?
+  whyRanked           String?
+  status              String           @default("draft")
+  reviewReason        String?
+  expiresAt           DateTime?
+  lastCheckedAt       DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  evidence            Evidence[]
+  creatorContent      CreatorContent[]
+  outboundClicks      OutboundClick[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([opportunityType])
+  @@index([organicScore])
+  @@index([expiresAt])
+}
+
+model Evidence {
+  id            String       @id @default(cuid())
+  projectId     String?
+  project       Project?     @relation(fields: [projectId], references: [id])
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+  rawEvidenceId String?
+  rawEvidence   RawEvidence? @relation(fields: [rawEvidenceId], references: [id])
+  sourceType    String
+  sourceUrl     String
+  title         String?
+  rawText       String?
+  aiSummary     String?
+  confidence    Int?
+  fetchedAt     DateTime?
+  submittedAt   DateTime?
+  status        String       @default("active")
+  createdAt     DateTime     @default(now())
+
+  @@index([projectId])
+  @@index([opportunityId])
+  @@index([status])
+}
+
+model Submission {
+  id                  String   @id @default(cuid())
+  url                 String
+  type                String
+  note                String?
+  contactEmail        String?
+  socialHandle        String?
+  contentUrl          String?
+  publicCreditOptIn   Boolean  @default(false)
+  submitterIpHash     String?
+  userAgentHash       String?
+  status              String   @default("received")
+  linkedProjectId     String?
+  linkedOpportunityId String?
+  reviewReason        String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([status])
+  @@index([type])
+}
+
+model Creator {
+  id             String           @id @default(cuid())
+  displayName    String
+  handle         String?
+  platform       String?
+  profileUrl     String?
+  avatarUrl      String?
+  role           String?
+  status         String           @default("pending")
+  qualityScore   Int?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  creatorContent CreatorContent[]
+}
+
+model CreatorContent {
+  id                String       @id @default(cuid())
+  creatorId         String?
+  creator           Creator?     @relation(fields: [creatorId], references: [id])
+  projectId         String?
+  project           Project?     @relation(fields: [projectId], references: [id])
+  opportunityId     String?
+  opportunity       Opportunity? @relation(fields: [opportunityId], references: [id])
+  contentUrl        String
+  platform          String?
+  contentType       String
+  title             String?
+  summary           String?
+  contributionType  String
+  publicCreditLabel String?
+  qualityLabel      String?
+  riskLabels        Json?
+  isSponsored       Boolean      @default(false)
+  status            String       @default("pending")
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([status])
+  @@index([projectId])
+  @@index([opportunityId])
+}
+
+model ScoreSnapshot {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  scoreType   String
+  score       Float
+  components  Json
+  explanation String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
+
+model OutboundClick {
+  id             String       @id @default(cuid())
+  opportunityId  String?
+  opportunity    Opportunity? @relation(fields: [opportunityId], references: [id])
+  projectId      String?
+  targetUrl      String
+  ctaType        String?
+  sourceModule   String?
+  category       String?
+  visitorIdHash  String?
+  sessionIdHash  String?
+  isSponsored    Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([opportunityId])
+  @@index([createdAt])
+}
+
+model AnalyticsEvent {
+  id             String   @id @default(cuid())
+  eventName      String
+  opportunityId  String?
+  projectId      String?
+  creatorId      String?
+  sourceModule   String?
+  targetUrl      String?
+  ctaType        String?
+  category       String?
+  props          Json?
+  visitorIdHash  String?
+  sessionIdHash  String?
+  createdAt      DateTime @default(now())
+
+  @@index([eventName])
+  @@index([createdAt])
+}
+
+model GithubMetricSnapshot {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id])
+  repoUrl       String
+  stars         Int?
+  forks         Int?
+  watchers      Int?
+  openIssues    Int?
+  pullRequests  Int?
+  contributors  Int?
+  releases      Int?
+  topics        Json?
+  license       String?
+  lastPushedAt  DateTime?
+  capturedAt    DateTime @default(now())
+
+  @@index([projectId])
+}
