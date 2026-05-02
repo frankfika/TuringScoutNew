@@ -235,6 +235,19 @@ async function main() {
   await prisma.project.deleteMany();
   await prisma.source.deleteMany();
   await prisma.submission.deleteMany();
+  await prisma.apiKey.deleteMany();
+  await prisma.categoryTrendSnapshot.deleteMany();
+  await prisma.projectReport.deleteMany();
+  await prisma.proofSubmission.deleteMany();
+  await prisma.campaignTask.deleteMany();
+  await prisma.campaign.deleteMany();
+  await prisma.attributionEvent.deleteMany();
+  await prisma.projectClaim.deleteMany();
+  await prisma.savedOpportunity.deleteMany();
+  await prisma.publicUser.deleteMany();
+  await prisma.notificationDraft.deleteMany();
+  await prisma.digestDraft.deleteMany();
+  await prisma.automationTask.deleteMany();
   await prisma.adminUser.deleteMany();
 
   await prisma.adminUser.create({ data: { email: "admin@turingscout.local", role: "owner" } });
@@ -496,6 +509,73 @@ async function main() {
       publicCreditOptIn: false,
     },
   });
+
+  const alice = await prisma.publicUser.create({
+    data: { email: "alice@example.com", displayName: "Alice Chen", role: "scout", creatorId: creatorRows[0].id },
+  });
+  const topOpp = await prisma.opportunity.findFirstOrThrow({ where: { status: "published" }, orderBy: { organicScore: "desc" } });
+  await prisma.savedOpportunity.create({ data: { userId: alice.id, opportunityId: topOpp.id, status: "completed", proofUrl: "https://example.com/alice-proof" } });
+  await prisma.attributionEvent.create({ data: { opportunityId: topOpp.id, projectId: topOpp.projectId, creatorId: creatorRows[0].id, eventType: "completed", source: "seed", value: 1 } });
+
+  const campaignProject = await prisma.project.findFirstOrThrow({ where: { status: "published", category: "ai-agents-mcp" } });
+  const campaign = await prisma.campaign.create({
+    data: {
+      projectId: campaignProject.id,
+      slug: "agent-builder-quality-campaign",
+      title: "Agent Builder Quality Campaign",
+      campaignType: "buildshare",
+      brief: "Create a useful integration, docs example, or benchmark. Quality review is required; fake engagement is rejected.",
+      rewardDescription: "Manual recognition and optional sponsor follow-up after review.",
+      eligibility: "Builders and creators with public proof links.",
+      status: "published",
+      isSponsored: true,
+      budgetLabel: "manual-first",
+      startsAt: now,
+    },
+  });
+  const task = await prisma.campaignTask.create({ data: { campaignId: campaign.id, title: "Build or document one useful agent workflow", proofRequirements: "Public repo, article, video, or benchmark URL showing the work." } });
+  await prisma.proofSubmission.create({ data: { campaignId: campaign.id, taskId: task.id, creatorId: creatorRows[1].id, userEmail: "creator@example.com", proofUrl: "https://example.com/campaign-proof", note: "Seed proof awaiting review", status: "pending" } });
+  await prisma.reviewQueueItem.create({ data: { entityType: "proof_submission", entityId: task.id, priority: "medium", reason: "Campaign proof requires quality review" } });
+
+  await prisma.projectClaim.create({ data: { projectId: campaignProject.id, contactEmail: "devrel@example.com", proofUrl: campaignProject.officialWebsiteUrl, note: "Seed project claim", status: "pending" } });
+
+  for (const project of await prisma.project.findMany({ where: { status: "published" }, take: 8 })) {
+    const clicks = await prisma.outboundClick.count({ where: { projectId: project.id } });
+    const oppCount = await prisma.opportunity.count({ where: { projectId: project.id, status: "published" } });
+    const creatorCoverage = await prisma.creatorContent.count({ where: { projectId: project.id, status: "visible" } });
+    const evidenceCount = await prisma.evidence.count({ where: { projectId: project.id, status: "active" } });
+    await prisma.projectReport.create({
+      data: {
+        projectId: project.id,
+        slug: `${project.slug}-basic-report`,
+        title: `${project.name} TuringScout Intelligence Report`,
+        summary: `Evidence-backed directional intelligence report for ${project.name}.`,
+        metrics: { opportunities: oppCount, creatorCoverage, evidenceCount, outboundClicks: clicks },
+        recommendations: ["Refresh source evidence", "Invite quality creator context", "Consider a reviewed buildshare campaign"],
+        status: "published",
+      },
+    });
+  }
+
+  const grouped = await prisma.project.groupBy({ by: ["category"], where: { status: "published", category: { not: null } } });
+  for (const group of grouped) {
+    if (!group.category) continue;
+    const opps = await prisma.opportunity.findMany({ where: { status: "published", project: { category: group.category } }, include: { project: true } });
+    await prisma.categoryTrendSnapshot.create({
+      data: {
+        category: group.category,
+        opportunityCount: opps.length,
+        averageScore: opps.reduce((sum, opp) => sum + (opp.organicScore ?? 0), 0) / Math.max(opps.length, 1),
+        topProjects: opps.slice(0, 5).map((opp) => ({ project: opp.project.name, title: opp.title, score: opp.organicScore })),
+        riskMix: {},
+      },
+    });
+  }
+
+  await prisma.digestDraft.create({ data: { period: now.toISOString().slice(0, 10), title: "Seed weekly digest", body: "Seed digest for operator workflow.", status: "draft" } });
+  await prisma.notificationDraft.create({ data: { targetType: "project", targetId: campaignProject.id, subject: "Seed project notification", body: "Draft notification for founder review.", status: "draft" } });
+  await prisma.automationTask.create({ data: { taskType: "seed_v1_5", status: "success", result: { generated: true }, finishedAt: now } });
+  await prisma.apiKey.create({ data: { name: "local-readonly", keyHash: "seed-local-readonly-hash", status: "active", scopes: ["read:opportunities", "read:reports"] } });
 }
 
 main()

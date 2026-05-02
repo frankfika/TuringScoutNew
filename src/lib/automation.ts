@@ -155,3 +155,126 @@ export async function runSource(sourceId: string, jobType = "manual") {
     });
   }
 }
+
+export async function createAutomationDigest() {
+  const [topOpportunities, openReview, sourceFailures, pendingRaw] = await Promise.all([
+    prisma.opportunity.findMany({ where: { status: "published" }, include: { project: true }, orderBy: { organicScore: "desc" }, take: 8 }),
+    prisma.reviewQueueItem.count({ where: { status: "open" } }),
+    prisma.sourceJobRun.count({ where: { status: { in: ["failed", "partial_failed", "blocked"] } } }),
+    prisma.rawEvidence.count({ where: { extractionStatus: "pending" } }),
+  ]);
+  const body = [
+    `Open review queue: ${openReview}`,
+    `Pending raw evidence extraction: ${pendingRaw}`,
+    `Source failures needing attention: ${sourceFailures}`,
+    "",
+    "Top opportunities:",
+    ...topOpportunities.map((item, index) => `${index + 1}. ${item.project.name} - ${item.title} (${Math.round(item.organicScore ?? 0)})`),
+  ].join("\n");
+
+  return prisma.digestDraft.create({
+    data: {
+      period: new Date().toISOString().slice(0, 10),
+      title: `TuringScout daily operator digest - ${new Date().toISOString().slice(0, 10)}`,
+      body,
+      status: "draft",
+    },
+  });
+}
+
+export async function createNotificationDrafts() {
+  const opportunities = await prisma.opportunity.findMany({ where: { status: "published" }, include: { project: true, creatorContent: { include: { creator: true }, take: 1 } }, orderBy: { organicScore: "desc" }, take: 5 });
+  const drafts = [];
+  for (const opportunity of opportunities) {
+    drafts.push(await prisma.notificationDraft.create({
+      data: {
+        targetType: "project",
+        targetId: opportunity.projectId,
+        channel: "email",
+        subject: `${opportunity.project.name} is ranking on TuringScout`,
+        body: `Your project appears in TuringScout because: ${opportunity.whyRanked} This is a draft notification for founder review, not an automated send.`,
+        status: "draft",
+      },
+    }));
+    const creator = opportunity.creatorContent[0]?.creator;
+    if (creator) {
+      drafts.push(await prisma.notificationDraft.create({
+        data: {
+          targetType: "creator",
+          targetId: creator.id,
+          channel: "email",
+          subject: `Your scout credit is visible for ${opportunity.project.name}`,
+          body: `Thanks for helping explain ${opportunity.project.name}. This draft can be used for weekly creator recognition.`,
+          status: "draft",
+        },
+      }));
+    }
+  }
+  return drafts;
+}
+
+export async function cleanupExpiredAndBroken() {
+  const expired = await prisma.opportunity.updateMany({
+    where: { status: "published", expiresAt: { lt: new Date() } },
+    data: { status: "expired", reviewReason: "Expired by cleanup job" },
+  });
+  const missingEvidence = await prisma.opportunity.findMany({ where: { status: "published", evidence: { none: { status: "active" } } } });
+  for (const opportunity of missingEvidence) {
+    await prisma.reviewQueueItem.create({ data: { entityType: "opportunity", entityId: opportunity.id, opportunityId: opportunity.id, priority: "high", reason: "Published opportunity has no active evidence" } });
+  }
+  return { expired: expired.count, missingEvidence: missingEvidence.length };
+}
+
+export async function createProjectReport(projectId: string) {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    include: { opportunities: true, creatorContent: true, evidence: true, githubSnapshots: { orderBy: { capturedAt: "desc" }, take: 1 } },
+  });
+  if (!project) throw new Error("Project not found");
+  const clicks = await prisma.outboundClick.count({ where: { projectId } });
+  const metrics = {
+    opportunities: project.opportunities.length,
+    creatorCoverage: project.creatorContent.length,
+    evidenceCount: project.evidence.length,
+    outboundClicks: clicks,
+    latestGithub: project.githubSnapshots[0] ?? null,
+  };
+  return prisma.projectReport.upsert({
+    where: { slug: `${project.slug}-basic-report` },
+    update: { metrics, summary: `Evidence-backed report for ${project.name}.`, status: "published" },
+    create: {
+      projectId,
+      slug: `${project.slug}-basic-report`,
+      title: `${project.name} TuringScout Intelligence Report`,
+      summary: `Evidence-backed report for ${project.name}. Attribution is directional and uses correlated lift language only.`,
+      metrics,
+      recommendations: ["Refresh official source evidence", "Invite useful creator context", "Consider a quality-reviewed campaign"],
+      status: "published",
+    },
+  });
+}
+
+export async function createCategoryTrendSnapshots() {
+  const categories = await prisma.project.groupBy({ by: ["category"], where: { status: "published", category: { not: null } } });
+  const snapshots = [];
+  for (const row of categories) {
+    if (!row.category) continue;
+    const opportunities = await prisma.opportunity.findMany({ where: { status: "published", project: { category: row.category } }, include: { project: true } });
+    const averageScore = opportunities.reduce((sum, item) => sum + (item.organicScore ?? 0), 0) / Math.max(opportunities.length, 1);
+    const riskMix = opportunities.reduce<Record<string, number>>((acc, item) => {
+      const risks = Array.isArray(item.riskLabels) ? item.riskLabels : [];
+      for (const risk of risks) acc[String(risk)] = (acc[String(risk)] ?? 0) + 1;
+      return acc;
+    }, {});
+    snapshots.push(await prisma.categoryTrendSnapshot.create({
+      data: {
+        category: row.category,
+        opportunityCount: opportunities.length,
+        averageScore,
+        topProjects: opportunities.slice(0, 5).map((item) => ({ project: item.project.name, title: item.title, score: item.organicScore })),
+        riskMix,
+      },
+    }));
+  }
+  return snapshots;
+}

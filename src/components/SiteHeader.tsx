@@ -3,6 +3,8 @@ import Link from "next/link";
 const nav = [
   ["Leaderboards", "/leaderboards"],
   ["Scouts", "/scouts"],
+  ["Campaigns", "/campaigns"],
+  ["Intelligence", "/intelligence"],
   ["Methodology", "/methodology"],
   ["Submit", "/submit"],
   ["Admin", "/admin"],

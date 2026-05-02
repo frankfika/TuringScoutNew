@@ -8,6 +8,9 @@ const nav = [
   ["Opportunities", "/admin/opportunities"],
   ["Submissions", "/admin/submissions"],
   ["Analytics", "/admin/analytics"],
+  ["Automation", "/admin/automation"],
+  ["Campaigns", "/admin/campaigns"],
+  ["Reports", "/admin/reports"],
 ];
 
 export function AdminNav() {

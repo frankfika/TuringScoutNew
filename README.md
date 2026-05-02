@@ -47,6 +47,24 @@ V1 operational flows now include:
 
 The seed creates 60 published opportunities, 100 raw evidence records, 25 visible creator-content credits, 5 visible scouts, and 1 source-job/review-queue pilot candidate.
 
+
+## Post-V1 Version Coverage
+
+The app now includes functional slices for the later roadmap versions too:
+
+- **V1.5 Automation**: `/admin/automation`, batch extraction, digest drafts, notification drafts, cleanup checks, category trend snapshots.
+- **V2 Profiles + Attribution**: `/auth`, `/me`, `/creators/[handle]`, saved/attempted/completed opportunities, proof links, project claims, attribution events.
+- **V3 Campaigns**: `/campaigns`, `/campaigns/[slug]`, sponsored disclosure, campaign tasks, proof submission, admin campaign review surface.
+- **V4 Intelligence/API**: `/intelligence`, `/reports/[slug]`, `/api/v1/opportunities`, `/api/v1/projects`, `/api/v1/categories/[category]`, `/api/v1/reports/project/[slug]`.
+
+Run the full local verification suite:
+
+```bash
+npm run verify
+```
+
+This runs lint, production build, starts the app on a smoke-test port, validates public/admin/auth/API flows, checks seeded data thresholds, and verifies private contact/IP fields are not exposed through public opportunity APIs.
+
 ## Current Direction
 
 V1 is intentionally narrow:
