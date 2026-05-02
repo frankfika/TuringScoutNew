@@ -48,6 +48,19 @@ V1 operational flows now include:
 The seed creates 60 published opportunities, 100 raw evidence records, 25 visible creator-content credits, 5 visible scouts, and 1 source-job/review-queue pilot candidate.
 
 
+
+## Production Hardening
+
+This repo includes baseline production hardening:
+
+- Security headers via `next.config.ts`
+- `/api/health` database and environment validation endpoint
+- `/admin/settings` environment diagnostics
+- `Dockerfile` for container builds
+- GitHub Actions workflow at `.github/workflows/ci.yml`
+- Public API response shapers in `src/lib/public-shapes.ts` to avoid leaking private submission/contact fields
+- Extended smoke tests for admin automation, report generation, project claims, campaign proof submission, security headers, and public API privacy
+
 ## Post-V1 Version Coverage
 
 The app now includes functional slices for the later roadmap versions too:

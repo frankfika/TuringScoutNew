@@ -226,15 +226,6 @@ async function main() {
   await prisma.sourceJobRun.deleteMany();
   await prisma.projectAcknowledgement.deleteMany();
   await prisma.scoreSnapshot.deleteMany();
-  await prisma.creatorContent.deleteMany();
-  await prisma.creator.deleteMany();
-  await prisma.evidence.deleteMany();
-  await prisma.rawEvidence.deleteMany();
-  await prisma.githubMetricSnapshot.deleteMany();
-  await prisma.opportunity.deleteMany();
-  await prisma.project.deleteMany();
-  await prisma.source.deleteMany();
-  await prisma.submission.deleteMany();
   await prisma.apiKey.deleteMany();
   await prisma.categoryTrendSnapshot.deleteMany();
   await prisma.projectReport.deleteMany();
@@ -248,6 +239,15 @@ async function main() {
   await prisma.notificationDraft.deleteMany();
   await prisma.digestDraft.deleteMany();
   await prisma.automationTask.deleteMany();
+  await prisma.creatorContent.deleteMany();
+  await prisma.creator.deleteMany();
+  await prisma.evidence.deleteMany();
+  await prisma.rawEvidence.deleteMany();
+  await prisma.githubMetricSnapshot.deleteMany();
+  await prisma.opportunity.deleteMany();
+  await prisma.project.deleteMany();
+  await prisma.source.deleteMany();
+  await prisma.submission.deleteMany();
   await prisma.adminUser.deleteMany();
 
   await prisma.adminUser.create({ data: { email: "admin@turingscout.local", role: "owner" } });

@@ -1,11 +1,12 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sha256 } from "@/lib/validators";
+import { getEnv } from "@/lib/env";
 
 const COOKIE_NAME = "ts_admin";
 
 export function adminPassword() {
-  return process.env.ADMIN_PASSWORD ?? "turingscout-admin";
+  return getEnv("ADMIN_PASSWORD");
 }
 
 export async function adminToken() {

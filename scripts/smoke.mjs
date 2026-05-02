@@ -40,10 +40,18 @@ server.stderr.on("data", (data) => process.stderr.write(`[server] ${data}`));
 try {
   await waitForServer(server);
 
-  for (const path of ["/", "/leaderboards/open-source-ai", "/campaigns", "/intelligence", "/methodology", "/sitemap.xml", "/robots.txt"]) {
+  for (const path of ["/", "/leaderboards/open-source-ai", "/campaigns", "/intelligence", "/methodology", "/api/health", "/sitemap.xml", "/robots.txt"]) {
     const { response } = await request(path);
     assert(response.status === 200, `${path} returns 200`);
   }
+
+  const homeHeaders = await request("/");
+  assert(homeHeaders.response.headers.get("x-frame-options") === "DENY", "security header X-Frame-Options is present");
+  assert(homeHeaders.response.headers.get("x-content-type-options") === "nosniff", "security header X-Content-Type-Options is present");
+
+  const healthApi = await request("/api/health");
+  const healthJson = JSON.parse(healthApi.text);
+  assert(healthApi.response.status === 200 && healthJson.database === "ok", "health endpoint reports database ok");
 
   const opportunitiesApi = await request("/api/opportunities?limit=3");
   assert(opportunitiesApi.response.status === 200, "/api/opportunities returns 200");
@@ -51,6 +59,11 @@ try {
   assert(opportunitiesJson.items.length === 3, "/api/opportunities respects limit");
   assert(!JSON.stringify(opportunitiesJson).includes("contactEmail"), "public opportunity API does not expose private contactEmail");
   assert(!JSON.stringify(opportunitiesJson).includes("submitterIpHash"), "public opportunity API does not expose IP hashes");
+
+  const v1Opportunities = await request("/api/v1/opportunities?limit=2");
+  const v1OpportunitiesJson = JSON.parse(v1Opportunities.text);
+  assert(!JSON.stringify(v1OpportunitiesJson).includes("primaryCtaUrl"), "v1 public API does not expose raw CTA redirect URLs");
+  assert(!JSON.stringify(v1OpportunitiesJson).includes("contactEmail"), "v1 public API does not expose contactEmail");
 
   const categoryApi = await request("/api/v1/categories/open-source-ai");
   assert(categoryApi.response.status === 200, "/api/v1/categories/[category] returns 200");
@@ -70,6 +83,10 @@ try {
   assert(Boolean(adminCookie), "admin login sets cookie");
   const adminHome = await request("/admin", { headers: { cookie: adminCookie } });
   assert(adminHome.response.status === 200, "admin dashboard opens with cookie");
+  const automationRun = await request("/api/admin/automation/run", { method: "POST", headers: { cookie: adminCookie } });
+  assert([303, 307, 308].includes(automationRun.response.status), "admin automation run redirects after execution");
+  const reportGenerate = await request("/api/admin/reports/generate", { method: "POST", headers: { cookie: adminCookie }, body: new URLSearchParams({}) });
+  assert([303, 307, 308].includes(reportGenerate.response.status), "admin report generation redirects after execution");
 
   const submitBody = new URLSearchParams({ url: "https://example.com/smoke-submission", type: "correction", note: "smoke test" });
   const submission = await fetch(`${base}/api/submissions`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(Object.fromEntries(submitBody)) });
@@ -83,6 +100,15 @@ try {
   const me = await request("/me", { headers: { cookie: userCookie } });
   assert(me.response.status === 200, "profile page opens with user cookie");
 
+  const claimProject = await prisma.project.findFirstOrThrow({ where: { status: "published" } });
+  const claimBody = new URLSearchParams({ projectId: claimProject.id, contactEmail: "claim-smoke@example.com", proofUrl: claimProject.officialWebsiteUrl ?? "https://example.com", note: "smoke claim" });
+  const claim = await request("/api/claims/project", { method: "POST", body: claimBody });
+  assert([303, 307, 308].includes(claim.response.status), "project claim submits for review");
+
+  const proofBody = new URLSearchParams({ email: "proof-smoke@example.com", proofUrl: "https://example.com/proof-smoke", note: "smoke proof" });
+  const proof = await request("/api/campaigns/agent-builder-quality-campaign/proof", { method: "POST", body: proofBody });
+  assert([303, 307, 308].includes(proof.response.status), "campaign proof submits for review");
+
   const reportApi = await request("/api/v1/reports/project/model-context-protocol");
   assert(reportApi.response.status === 200, "project intelligence report API returns 200");
   const reportJson = JSON.parse(reportApi.text);
@@ -94,12 +120,18 @@ try {
     creatorContent: await prisma.creatorContent.count({ where: { status: "visible" } }),
     campaigns: await prisma.campaign.count({ where: { status: "published" } }),
     reports: await prisma.projectReport.count({ where: { status: "published" } }),
+    automationTasks: await prisma.automationTask.count(),
+    proofSubmissions: await prisma.proofSubmission.count(),
+    projectClaims: await prisma.projectClaim.count(),
   };
   assert(counts.published >= 60, "database has 60+ published opportunities");
   assert(counts.rawEvidence >= 100, "database has 100+ raw evidence records");
   assert(counts.creatorContent >= 20, "database has 20+ visible creator content records");
   assert(counts.campaigns >= 1, "database has published campaigns");
   assert(counts.reports >= 1, "database has published reports");
+  assert(counts.automationTasks >= 1, "database has automation task logs");
+  assert(counts.proofSubmissions >= 1, "database has proof submissions");
+  assert(counts.projectClaims >= 1, "database has project claims");
 
   console.log(`\nSmoke checks passed (${checks.length})`);
   for (const check of checks) console.log(`- ${check}`);

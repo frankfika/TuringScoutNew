@@ -1,7 +1,7 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isValidEmail, isValidHttpUrl, optionalValidHttpUrl, sha256 } from "@/lib/validators";
+import { headers as nextHeaders } from "next/headers";
 
 const allowedTypes = new Set(["project", "opportunity", "free_credits", "github_repo", "agent", "bounty", "creator_content", "correction", "risk_report", "sponsored_interest"]);
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   if (!optionalValidHttpUrl(contentUrl)) return NextResponse.json({ error: "Creator/content URL must be http(s)." }, { status: 400 });
   if (!isValidEmail(contactEmail)) return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
 
-  const requestHeaders = await headers();
+  const requestHeaders = await nextHeaders();
   const ip = requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const userAgent = requestHeaders.get("user-agent") ?? "unknown";
   const [submitterIpHash, userAgentHash] = await Promise.all([sha256(ip), sha256(userAgent)]);

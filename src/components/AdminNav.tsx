@@ -11,6 +11,7 @@ const nav = [
   ["Automation", "/admin/automation"],
   ["Campaigns", "/admin/campaigns"],
   ["Reports", "/admin/reports"],
+  ["Settings", "/admin/settings"],
 ];
 
 export function AdminNav() {

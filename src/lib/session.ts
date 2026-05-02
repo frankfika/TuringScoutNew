@@ -1,11 +1,12 @@
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { sha256 } from "@/lib/validators";
+import { getEnv } from "@/lib/env";
 
 const COOKIE_NAME = "ts_user";
 
 export async function userToken(userId: string) {
-  return `${userId}.${await sha256(`ts-user:${userId}:${process.env.AUTH_SECRET ?? "local-auth"}`)}`;
+  return `${userId}.${await sha256(`ts-user:${userId}:${getEnv("AUTH_SECRET")}`)}`;
 }
 
 export async function setUserCookie(userId: string) {

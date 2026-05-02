@@ -4,9 +4,11 @@ import { prisma } from "@/lib/prisma";
 
 export default async function ReviewPage() {
   await requireAdmin();
-  const [items, submissions] = await Promise.all([
+  const [items, submissions, proofs, claims] = await Promise.all([
     prisma.reviewQueueItem.findMany({ where: { status: "open" }, include: { opportunity: { include: { project: true, evidence: true } } }, orderBy: [{ priority: "asc" }, { createdAt: "desc" }], take: 100 }),
     prisma.submission.findMany({ where: { status: "received" }, orderBy: { createdAt: "desc" }, take: 20 }),
+    prisma.proofSubmission.findMany({ where: { status: "pending" }, include: { campaign: true, creator: true }, orderBy: { createdAt: "desc" }, take: 30 }),
+    prisma.projectClaim.findMany({ where: { status: "pending" }, include: { project: true }, orderBy: { createdAt: "desc" }, take: 30 }),
   ]);
 
   return (
@@ -30,6 +32,12 @@ export default async function ReviewPage() {
         </article>)}
         {!items.length ? <div className="glass rounded-[30px] p-8 text-center font-bold">No open review items.</div> : null}
       </div>
+
+      <h2 className="mt-10 text-3xl font-black">Campaign proof submissions</h2>
+      <div className="mt-4 grid gap-3">{proofs.map((proof) => <article key={proof.id} className="glass rounded-[24px] p-4 text-sm"><p className="font-black">{proof.campaign?.title ?? "General proof"} / {proof.creator?.handle ?? proof.userEmail ?? "anonymous"}</p><a href={proof.proofUrl} target="_blank" rel="noreferrer" className="mt-1 block break-all text-moss">{proof.proofUrl}</a><p className="mt-2 text-ink/60">{proof.note}</p><div className="mt-3 flex gap-2"><form action={`/api/admin/proofs/${proof.id}/approve`} method="post"><button className="rounded-full bg-moss px-4 py-2 font-black text-white">Approve</button></form><form action={`/api/admin/proofs/${proof.id}/reject`} method="post"><button className="rounded-full bg-ink px-4 py-2 font-black text-sand">Reject</button></form></div></article>)}</div>
+
+      <h2 className="mt-10 text-3xl font-black">Project claims</h2>
+      <div className="mt-4 grid gap-3">{claims.map((claim) => <article key={claim.id} className="glass rounded-[24px] p-4 text-sm"><p className="font-black">{claim.project.name} / private contact stored</p>{claim.proofUrl ? <a href={claim.proofUrl} target="_blank" rel="noreferrer" className="mt-1 block break-all text-moss">{claim.proofUrl}</a> : null}<p className="mt-2 text-ink/60">{claim.note}</p><div className="mt-3 flex gap-2"><form action={`/api/admin/claims/${claim.id}/approve`} method="post"><button className="rounded-full bg-moss px-4 py-2 font-black text-white">Approve</button></form><form action={`/api/admin/claims/${claim.id}/reject`} method="post"><button className="rounded-full bg-ink px-4 py-2 font-black text-sand">Reject</button></form></div></article>)}</div>
 
       <h2 className="mt-10 text-3xl font-black">Received submissions</h2>
       <div className="mt-4 grid gap-3">
