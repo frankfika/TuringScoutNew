@@ -1,200 +1,62 @@
-# Demand Research
+# 早期需求调研笔记
 
-## 1. Demand Summary
+> 归档说明：本文档是早期需求调研的原始笔记，调研结论已融入 02-v1-prd.md 和 06-feasibility-research.md。
 
-The strongest demand is not “buy GitHub stars” directly. The real demand is:
+## 调研方法
 
-- Get developer attention
-- Convert attention into trials
-- Convert trials into stars, forks, content, issues, PRs, Discord users, API calls, and agent sessions
-- Show investors, users, and partners credible traction
-- Avoid fake growth risk
+- 社区观察：GitHub Trending、HN Show、Reddit r/MachineLearning 日常浏览
+- 用户访谈：5 位 AI 开发者，3 位技术投资人（非正式交流）
+- 竞品体验：GitHub Trending、ProductHunt、Hugging Face、CookieDAO
+- 关键词搜索量分析
 
-The user-side demand is also strong:
+## 核心发现
 
-- People want to find AI tools with free credits, points, bounties, grants, or future airdrop potential
-- Developers want to discover high-potential open-source AI projects early
-- Creators want sponsor opportunities and topic ideas
-- Agent users want to find new agents worth trying
+### 1. AI 开发者的信息获取习惯
 
-## 2. Project-Side Buying Motivations
+**日常获取信息的渠道**：
+1. GitHub Trending（每天）
+2. Twitter/X AI 圈（每天）
+3. Hacker News（高频）
+4. Reddit r/MachineLearning（中频）
+5. 微信群/Telegram 群（被动接收）
+6. 知乎 AI 话题（中文用户）
 
-### Open-Source AI Projects
+**主要痛点**：
+- "GitHub Trending 上 AI 项目越来越分散，需要自己筛选"
+- "很多好项目在 Trending 上看不到，是通过朋友推荐才知道的"
+- "试用的 API 额度经常过期了才知道"
+- "想知道某个方向有哪些项目在做，但没有好的工具"
 
-They care about:
+### 2. 对"项目发现工具"的期待
 
-- GitHub star velocity
-- Real developers trying the repo
-- Integration examples
-- Tutorials and benchmarks
-- Issue/PR activity
-- Community credibility
+**需要的功能（按提及频率排序）**：
+1. AI 专属的 GitHub Trending（5/5 提到）
+2. 免费 API 和试用额度汇总（4/5）
+3. 项目之间的对比功能（3/5）
+4. 中文内容 + 中文社区（中文用户强需求）
+5. 邮件/推送通知（2/5）
 
-Budget form:
+**不需要的功能**：
+- 社交功能（评论、点赞）—— "已经有 Twitter/HN 了"
+- AI 生成的摘要 —— "不信任 AI 摘要"
 
-- Cash bounty
-- Cloud/API credits
-- Swag
-- Early access
-- Grants
-- Future token/points allocation if Web3-adjacent
+### 3. 投资人/创业者的需求
 
-### AI Infra / DevTools
+**需要的信息**：
+- 项目增长数据（star 增长曲线、贡献者增长）
+- 技术栈趋势（哪些框架/模型在上升）
+- 竞品格局（某个细分赛道有哪些项目）
+- 团队信息（虽然 GitHub 难以直接获取）
 
-They care about:
+**当前获取方式**：
+- 人工追踪 + Excel 表格
+- 订阅 Newsletter
+- 通过人脉打听
 
-- Qualified developer leads
-- Docs traffic
-- SDK installs
-- Trial signups
-- Technical content
-- Comparisons and benchmarks
-- Community adoption
+## 关键结论
 
-Budget form:
-
-- Marketing budget
-- DevRel budget
-- Startup credits
-- Partner campaigns
-
-### AI Agent Projects
-
-They care about:
-
-- Agent usage
-- Workflow integrations
-- Ratings and feedback
-- Benchmark demos
-- Real user stories
-- Distribution across communities
-
-Budget form:
-
-- Free usage credits
-- Paid usage rebates
-- Competition prizes
-- Affiliate/referral rewards
-
-### AI Consumer Apps
-
-They care about:
-
-- Signups
-- Viral demos
-- Social proof
-- Free trial usage
-- Waitlist growth
-- UGC
-
-Budget form:
-
-- Referral rewards
-- Free credits
-- Pro plan giveaways
-- Creator sponsorships
-
-## 3. Hunter-Side Motivations
-
-### Casual Hunters
-
-Want:
-
-- Free AI credits
-- Possible airdrops
-- Easy daily tasks
-- No complex setup
-- Clear reward amount
-
-### Power Hunters
-
-Want:
-
-- A dashboard of tasks across many AI projects
-- Calendar/reminders
-- Proof tracking
-- Multi-account warning/risk control
-- Expected value ranking
-
-### Builders
-
-Want:
-
-- Higher-quality technical bounties
-- Public reputation
-- Useful projects to learn from
-- GitHub profile enhancement
-
-### Creators
-
-Want:
-
-- Paid topics
-- Clear campaign briefs
-- Project background
-- Content angle suggestions
-- Performance proof
-
-## 4. High-Intent Demand Signals To Track
-
-Project side:
-
-- “Submit your project” conversion
-- Inbound requests for featured placement
-- Campaign budget willingness
-- Repeat campaigns
-- UTM traffic to project sites
-- GitHub star/fork lift after featuring
-- Discord invite joins
-- Trial signup lift
-
-User side:
-
-- Daily active visitors
-- Task click-through rate
-- Saved tasks
-- Telegram/Discord/email subscriptions
-- Return rate
-- Claim attempts
-- Search queries
-- Filter usage
-
-## 5. Why Low Registration Matters
-
-If the product requires users to register before seeing opportunities, CAC rises sharply. The correct flow is:
-
-- Browse first
-- Click tasks freely
-- Register only when value is obvious
-- Use GitHub/X/email login only for reward claims, watchlists, and reputation
-
-This creates SEO, social sharing, and direct traffic loops.
-
-## 6. Compliance And Trust
-
-Avoid these traps:
-
-- Guaranteed GitHub stars
-- Paid spam comments
-- Undisclosed sponsored posts
-- Fake review markets
-- Platform policy violations
-- Bot traffic
-
-Use safer framing:
-
-- Featured discovery
-- Developer trial campaigns
-- Technical contribution bounties
-- Content grants
-- Integration challenges
-- Community quests
-- Agent evaluation tasks
-
-## 7. Best Initial Niche
-
-The strongest wedge is:
-
-> AI projects with credits/points/waitlists/open-source repos that want early users, and AI hunters/builders who want to discover reward opportunities before they become crowded.
-
-This is more accessible than pure enterprise DevRel and more scalable than custom consulting.
+1. AI 项目发现有明确需求，尤其在中文市场缺少好的工具
+2. "无须注册、打开即看" 的模式最受开发者欢迎
+3. 数据新鲜度最重要，过时的信息比没有信息更糟糕
+4. 免费是前提，但愿意为高级功能付费（API 调用、定制报告）
+5. V1 不需要社交功能，专注于数据聚合和展示

@@ -1,265 +1,298 @@
-# 04 V1 UX Spec
+# 04 — V1 UX 规范
 
-Canonical status: current source of truth for V1 user experience.
+## 一、设计总纲
 
+### 核心理念
 
-## UX Goal
+**V1 是纯只读的 AI 机会榜单。用户只能浏览和点击，没有提交、没有登录、没有社区。**
 
-A new user should find, understand, and click a useful AI opportunity within 30 seconds without logging in.
+### 设计原则
+- **零学习成本**：打开浏览器就能看，不需要理解任何概念
+- **信息渐进**：列表只给最核心信息，深度内容到详情页再看
+- **行动导向**：每个页面的核心任务只有一件事
+- **移动端优先**：主力使用场景是手机碎片浏览
 
-## Fast User Explanation
+---
 
-Homepage copy should make the product obvious in one glance:
+## 二、全局元素
 
-```text
-AI 项目机会榜
-每天发现值得薅、值得试、值得关注的 AI 项目。
+### 2.1 导航栏
 
-看收益、看难度、看来源、看风险，30 秒决定要不要试。
+```
+┌──────────────────────────────────────────┐
+│  TuringScout                    关于      │
+└──────────────────────────────────────────┘
 ```
 
-English alternative:
+- 极简：Logo + 名称 + 一个"关于"链接
+- 没有搜索框、没有提交入口、没有排行入口
+- 移动端：同样极简，汉堡菜单收起"关于"
 
-```text
-AI opportunities worth trying today.
-Ranked by value, credibility, momentum, effort, and risk.
+### 2.2 类型图标
+
+列表上唯一视觉标记，4 个 emoji：
+
+| 类型 | 图标 |
+|------|------|
+| 免费试用 | 🆓 |
+| 开源项目 | 📦 |
+| 积分奖励 | 🎁 |
+| 奖金竞赛 | 🏆 |
+
+---
+
+## 三、页面设计
+
+### 3.1 首页 — 机会列表 `/`
+
+**V1 唯一的核心页面。**
+
+```
+┌──────────────────────────────────────────┐
+│  TuringScout                    关于      │
+├──────────────────────────────────────────┤
+│  AI 机会发现 · 每日自动更新               │
+│                                          │
+│  [全部] [🆓 免费试用] [📦 开源] [🎁 积分] [🏆 竞赛]  │
+│  排序: [评分最高 ▾] [最新发布]             │
+├──────────────────────────────────────────┤
+│                                          │
+│  🆓  OpenAI — 新用户注册送$5 API额度      │
+│      免费额度，注册即领 · 3天前            │
+│  ─────────────────────────────────────── │
+│  📦  LangChain — LLM应用开发框架          │
+│      GitHub 95k Star · 昨天更新           │
+│  ─────────────────────────────────────── │
+│  🆓  Claude — 免费试用 Claude API         │
+│      15天免费体验 · 1天前                 │
+│  ─────────────────────────────────────── │
+│  🏆  AI Hackathon — 总奖金池$50k         │
+│      报名截止5月20日 · 2天前              │
+│  ─────────────────────────────────────── │
+│  ...                                     │
+│                                          │
+│  [加载更多]                               │
+├──────────────────────────────────────────┤
+│  TuringScout · 数据来自 GitHub / HN 等平台 │
+│  所有机会由 AI 自动抓取，每日更新           │
+└──────────────────────────────────────────┘
 ```
 
-Social loop copy:
+**设计决策**：
 
-```text
-发现好机会？可以提交线索、纠错或内容，被标记为 Spotted by / Top Voice。
-项目被看见，创作者也被看见。
+| 要素 | 决策 |
+|------|------|
+| 布局 | 单列列表，适合垂直扫读 |
+| 每行信息 | 图标 + 项目名-标题 + 一句描述 + 时间，4 要素 |
+| Tab | 5 个（含"全部"），横向滚动或换行 |
+| 分页方式 | "加载更多"按钮，每页 20 条 |
+| 评分 | 不展示数字，按分数排即可 |
+
+**列表行结构**：
+
+```
+🆓  OpenAI — 新用户注册送$5 API额度
+    免费额度，注册即领 · 3天前
+    ↑                      ↑
+   图标+项目-标题           一句价值+时间
 ```
 
-## UX Principles
+- 第一行：核心信息，字号 16px
+- 第二行：辅助信息，灰色 14px
+- 整行可点击，进入机会详情
 
-- **Browse-first**: no login before browsing, filtering, details, or outbound clicks
-- **One-screen judgment**: cards show reward, effort, trust, risk, and CTA
-- **Trust-labeled**: source and risk labels are visible everywhere
-- **One-click outbound**: official project links are the primary action
-- **Opportunity-hunter first**: prioritize upside, time, difficulty, and risk over deep analytics
-- **Creator-visible**: give public credit to scouts and creators who surface, explain, validate, correct, or optionally submit useful opportunities
+**空状态**：
+- 如果某 Tab 无数据："该分类暂无机会"
+- 首次上线且无数据：展示 3 条手工录入的示例，标注"示例"
 
-## Homepage UX
+---
 
-Primary job: show today’s best opportunities immediately.
+### 3.2 机会详情页 `/opportunities/[slug]`
 
-Recommended structure:
+**核心模块：AI 点评。不是干巴巴的数据展示，而是 AI 帮你理解这个项目。**
 
-1. Hero: “Today’s AI opportunities, ranked by value, credibility, and momentum.”
-2. Top 10 Today’s AI Opportunities
-3. Quick filters
-4. Spotted by AI Scouts / Top Voices preview
-5. Category leaderboard previews
-6. Rising Open-Source AI Projects
-7. Trending AI Agents / MCP Tools
-8. Optional correction / social proof CTA
-9. Subscribe CTA
-
-Quick filters:
-
-- Free Credits
-- Possible Airdrop
-- GitHub
-- Agent Trial
-- Bounty
-- No Login
-- 5 Min
-- Verified
-- Ending Soon
-
-## Opportunity Card UX
-
-Each card must show:
-
-- project name
-- opportunity hook
-- reward/upside type
-- estimated time
-- difficulty
-- trust label
-- risk label
-- why ranked
-- spotted by / useful social proof count when available
-- primary CTA
-
-Example card content:
-
-```text
-Project: ExampleAI
-Hook: Claim free API credits for testing a new agent SDK
-Reward: Free Credits
-Time: 5 min
-Trust: Official Source
-Risk: Reward availability may change
-Why ranked: active GitHub repo + clear official offer + low effort
-CTA: Go claim
+```
+┌──────────────────────────────────────────┐
+│  ← 返回列表                               │
+│                                          │
+│  🆓 免费试用                              │
+│  OpenAI — 新用户送$5 API额度              │
+│                                          │
+│  注册 OpenAI 账号即可获得 $5 API 额度，    │
+│  可用于 GPT-4、DALL-E 等所有 API。         │
+│                                          │
+│  ── 🤖 AI 点评 ──────────────────────────  │
+│                                          │
+│  💡 为什么值得关注                         │
+│  · 业界最强的 LLM API，GPT-4 仍是基准      │
+│  · $5 额度足够个人开发者试用上千次         │
+│  · 中文能力持续提升，国内场景可用          │
+│                                          │
+│  👥 适合谁                                │
+│  想体验最强 LLM 的开发者，不需绑定信用卡    │
+│                                          │
+│  🆚 同类对比                              │
+│  OpenAI vs Claude: OpenAI生态更丰富        │
+│  OpenAI vs Gemini: OpenAI文档更完善        │
+│                                          │
+│  📊 AI 综合评分    ⭐ 92                   │
+│  ┌────────────────────────────────────┐   │
+│  │ AI相关性 ████████░░ 85  ｜ 技术底座  │   │
+│  │ 热度     ██████████ 94  ｜ 全网最高  │   │
+│  │ 可信度   █████████░ 90  ｜ 官方产品  │   │
+│  │ 易用性   ██████████ 95  ｜ 注册即用  │   │
+│  │ 时效性   ████████░░ 80  ｜ 长期有效  │   │
+│  └────────────────────────────────────┘   │
+│                                          │
+│  ── 📋 机会信息 ────────────────────────   │
+│  ┌────────────┐ ┌────────────┐           │
+│  │ 💰 奖励     │ │ 📝 门槛     │           │
+│  │ $5 免费额度 │ │ 注册即可    │           │
+│  └────────────┘ └────────────┘           │
+│  ┌────────────┐ ┌────────────┐           │
+│  │ ⏰ 时效     │ │ 🔗 直达     │           │
+│  │ 长期有效    │ │ openai.com │           │
+│  └────────────┘ └────────────┘           │
+│                                          │
+│  ┌──────────────────────────────────┐    │
+│  │         [🔗 立即参与 →]           │    │
+│  └──────────────────────────────────┘    │
+│                                          │
+│  ── 🔍 数据溯源 ──              [展开 ▼]  │
+│  ┌──────────────────────────────────┐    │
+│  │ 数据来源：GitHub API（2h前更新）   │    │
+│  │ 数据抓取：AI 自动               │    │
+│  │ AI 点评生成时间：2026-05-04      │    │
+│  │ ⚠️ AI 生成内容仅供参考           │    │
+│  └──────────────────────────────────┘    │
+└──────────────────────────────────────────┘
 ```
 
-Creator/social proof line examples:
+**信息分层（重要）**：
 
-```text
-Spotted by: @scoutname
-Useful context: 3 creator posts, 1 tutorial, 1 project reply
+| 层级 | 内容 | 位置 |
+|------|------|------|
+| 第1层（首屏必看） | 类型 + 标题 + AI点评（亮点+适合谁+对比+打分） | 滚动可见 |
+| 第2层（首屏） | 机会信息格 + CTA 按钮 | 紧接 AI 点评下方 |
+| 第3层（折叠） | 数据溯源（来源、更新时间、AI 免责声明） | 点击展开 |
+
+**AI 点评设计要点**：
+
+| 要素 | 设计 |
+|------|------|
+| 为什么值得关注 | 3-5 条要点，中文，口语化而非学术腔 |
+| 适合谁 | 一句话，具体到人群（"想学Agent开发的Python工程师" 而非 "开发者"） |
+| 同类对比 | 列举 2-3 个同类项目，一句话说区别 |
+| AI 综合评分 | 每个维度显示分数 + **一句话解读**（不是干巴巴的数字） |
+| AI 来源标记 | "🤖 AI 点评" 标题明确标记，折叠区有免责声明 |
+| 人类修正 | 管理员后台可编辑 AI 输出的任何字段
+
+**CTA 按钮**：
+- 主色调蓝色，圆角，大号
+- 点击新窗口打开目标 URL
+- 记录 click-out 埋点
+
+---
+
+### 3.3 项目详情页 `/projects/[slug]`
+
+```
+┌──────────────────────────────────────────┐
+│  ← 返回                                   │
+│                                          │
+│  LangChain                                │
+│  构建 LLM 应用的开发框架                   │
+│  🌐 langchain.com · 📦 github.com/...     │
+│                                          │
+│  ⭐ 95,000  🍴 22,000  📝 500+ issues    │
+│  🐍 Python · JS · 创建于 2022-10         │
+│                                          │
+│  ── 相关机会 ──                           │
+│  🆓 LangSmith 免费试用 — 开发者免费额度    │
+│  📦 LangGraph 开源 — 多Agent编排框架       │
+│  ...                                     │
+└──────────────────────────────────────────┘
 ```
 
-## Opportunity Detail UX
+---
 
-The page must answer:
+### 3.4 关于页 `/methodology`
 
-1. What is this?
-2. What can I get?
-3. What do I need to do?
-4. How long will it take?
-5. Is it official or unverified?
-6. What are the risks?
-7. Where do I go next?
+```
+┌──────────────────────────────────────────┐
+│  ← 返回                                   │
+│                                          │
+│  关于 TuringScout                         │
+│                                          │
+│  数据来源                                 │
+│  · GitHub Trending — AI 项目自动发现      │
+│  · Hacker News Show — 社区推荐项目        │
+│  · Hugging Face — 模型和 Space 趋势       │
+│                                          │
+│  数据更新频率                             │
+│  · GitHub: 每小时                         │
+│  · HN / HF: 每天 4 次                     │
+│                                          │
+│  评分逻辑                                 │
+│  综合 AI 相关性、热度动量、机会价值等      │
+│  多维度自动评分，每日更新排序。            │
+│                                          │
+│  联系                                     │
+│  hello@turingscout.com                   │
+└──────────────────────────────────────────┘
+```
 
-Recommended sections:
+---
 
-- summary
-- reward/upside
-- task steps
-- effort estimate
-- official/source links
-- risk notes
-- why ranked
-- spotted by / explained by / useful creator links
-- similar opportunities
-- report/update link
+## 四、响应式设计
 
-## Project Page UX
+| 断点 | 布局 |
+|------|------|
+| ≥ 768px | 最大宽度 768px 居中，单列列表 |
+| < 768px | 100% 宽度，Tab 换行 |
 
-Purpose: show everything known about one AI project.
+单列列表天然适配移动端，不需要额外断点调整。
 
-Sections:
+---
 
-- project summary
-- official links
-- GitHub metrics if available
-- active opportunities
-- ranking appearances
-- top scouts / top voices
-- useful creator content and project acknowledgements
-- source evidence list
-- risk/credibility notes
-- similar projects
+## 五、交互状态
 
-## Category Leaderboard UX
+### 5.1 加载
+- 首次加载：5 行骨架屏（灰色占位条）
+- Tab 切换：列表淡入淡出
 
-Each category page should include:
+### 5.2 空状态
+- Tab 无数据："该分类暂无机会"
+- 全站无数据（刚上线）：3 条示例 + 说明文字
 
-- category explanation
-- ranking methodology for that category
-- ranked cards
-- filters
-- last updated time
-- source/risk legend
+### 5.3 错误
+- 列表加载失败：错误提示 + "重新加载"按钮
+- 详情页 404："机会不存在或已下架" + 返回链接
 
-## Submit / Correction Page UX
+### 5.4 微交互
+- 列表行 hover/点击：背景微变
+- 详情页"展开"：平滑下拉
+- CTA 按钮：hover 加深，点击缩放反馈
 
-Purpose: make optional submissions, corrections, risk reports, and creator credit effortless.
+---
 
-This page should not feel like the main product loop. The main product loop is automated discovery and ranking; this page is a lightweight improvement path.
+## 六、色彩和排版
 
-Required fields:
+### 6.1 色彩
 
-- URL
-- type
+| 用途 | Hex | 说明 |
+|------|-----|------|
+| 主文字 | #111827 | 标题和正文 |
+| 辅助文字 | #6B7280 | 时间、描述 |
+| 链接/CTA | #3B82F6 | 按钮、链接 |
+| 分割线 | #E5E7EB | 列表行之间 |
+| 背景 | #FFFFFF | 整体背景 |
+| hover 背景 | #F9FAFB | 列表行 hover |
 
-Type options:
+不需要多套颜色——没有信任标签、风险标签、评分色阶。
 
-- project
-- opportunity
-- free credits
-- GitHub repo
-- agent
-- bounty
-- correction
-- risk report
-
-Optional fields:
-
-- note
-- contact
-- social handle
-- content/post URL
-- budget/featured interest
-
-AI extracts project name, summary, category, tags, reward, task steps, source, and risk.
-
-## Creator / Scout UX
-
-V1 should make social participation lightweight:
-
-- no login required to submit a correction, content/proof URL, or credit request
-- optional display name/social handle for public credit
-- clear checkbox for "show me publicly as spotted by/explained by"
-- share card generated after approval
-- public Top Scouts/Top Voices preview can be weekly and manually curated at first
-- creator content is labeled separately from official project sources
-
-Avoid:
-
-- implying creators will definitely earn rewards
-- rewarding raw post volume
-- showing private contact information publicly
-- mixing paid creator campaigns with organic scout recognition
-
-## Label System
-
-Trust labels:
-
-- Official Source
-- Verified
-- Unverified
-- AI Summary
-- Last Checked
-
-Risk labels:
-
-- Reward Not Guaranteed
-- High Risk
-- Requires Wallet
-- Possible Spam Task
-- No Clear Reward Terms
-
-Utility labels:
-
-- No Login
-- 5 Min
-- Beginner Friendly
-- Builder Task
-- Ending Soon
-
-Commercial labels:
-
-- Sponsored
-- Featured
-- Partner Campaign
-
-## Login UX
-
-V1 should not require login.
-
-Login can appear later for:
-
-- save opportunity
-- mark completed
-- submit proof
-- build contributor profile
-- subscribe to personalized alerts
-
-## UX Anti-Patterns
-
-Avoid:
-
-- login wall before browsing
-- too many metrics on cards
-- guaranteed airdrop language
-- sponsored cards that look organic
-- unclear source provenance
-- AI speculation presented as fact
-- platform-native task completion before value is clear
-- dark-pattern countdowns or fake scarcity
+### 6.2 排版
+- 标题：16px / 500 weight
+- 辅助信息：14px / 400 / 灰色
+- CTA 按钮：16px / 500
+- 字体：系统默认字体栈

@@ -1,164 +1,133 @@
-# 08 Naming
+# 08 — 命名逻辑
 
-Canonical status: current naming recommendation.
+## 一、推荐命名：TuringScout
 
+### 1.1 命名原理
 
-## Recommendation
+**TuringScout** = **Turing**（图灵） + **Scout**（侦察兵/发现者）
 
-Use **TuringScout** as the working product name.
+| 组成部分 | 含义 | 联想 |
+|---------|------|------|
+| **Turing** | Alan Turing，计算机科学和 AI 之父 | AI、智能、图灵测试、计算机科学 |
+| **Scout** | 侦察兵、探索者、发现者 | 探索、发现、前沿、情报、先遣 |
 
-One-line meaning:
+### 1.2 命名优势
 
-> TuringScout is the place where AI scouts and creators discover, explain, and rank useful AI opportunities before they become obvious.
+**语义层面**：
+- 准确传达了产品核心：在 AI 领域做探索和发现
+- "Scout" 暗示主动寻找而非被动接收，与用户行为一致
+- "Turing" 暗示权威性和技术深度，不只是一个目录
 
-Chinese explanation:
+**用户层面**：
+- 用户角色自然延伸：用户 = Scout（侦察兵），正在"侦察"AI 项目
+- "成为 TuringScout" = 身份认同感
+- 未来创作者可称 "Top Scout" 或 "Turing Scout"
 
-> TuringScout 是一个 AI 项目机会榜，鼓励 Scout、创作者和 KOL 发现、解释、验证好项目，并把这些贡献公开展示出来。
+**品牌层面**：
+- 独特性强，Google 搜索无混淆
+- 域名可用（turingscout.com）
+- 缩写 TS 简洁
 
-
-## Why Not The Old Name
-
-Do not use `AICookieDao` or any cookie-based name as the public brand.
-
-Reasons:
-
-- It sounds derivative instead of inspired.
-- It makes the product feel crypto-first before the AI opportunity product is proven.
-- It implies DAO/token/governance too early.
-- It weakens the project's own identity.
-
-The source inspiration should remain a mechanism reference, not the public brand anchor.
-
-
-## Why Not TuringDAO
-
-`TuringDAO` is a strong-sounding name, but it is not recommended as the V1 public brand.
-
-Reasons:
-
-- It appears to already be used publicly by TuringM for a prediction-market-related DAO/product.
-- "DAO" creates token, governance, wallet, and regulatory expectations before V1 needs them.
-- The V1 product is more about scouting, ranking, and adoption than governance.
-
-If a DAO/community layer is added later, use it as a secondary concept:
-
-- TuringScout Network
-- TuringScout DAO
-- TuringScout Guild
-- TuringScout Council
-
-Do not lead with it in V1.
-
-
-## Why TuringScout Works
-
-### Product Fit
-
-The core product is not only ranking projects. It is also recognizing people who find and explain them.
-
-`Scout` captures:
-
-- early discovery
-- human curation
-- creator/KOL participation
-- project visibility
-- status and recognition
-
-### User Psychology
-
-The product wants people to feel:
-
-> I found this early, I helped others understand it, and the platform/project recognized me.
-
-`TuringScout` makes the contributor role clear from the name.
-
-### Roadmap Fit
-
-The name can stretch across versions:
-
-- V1: TuringScout leaderboard
-- V1.5: TuringScout weekly report
-- V2: TuringScout profiles and Top Voices
-- V3: TuringScout campaigns
-- V4: TuringScout intelligence/API
-- V5: TuringScout Network / Guild / DAO if needed
-
-
-## Naming Architecture
-
-Recommended:
-
-- Product: TuringScout
-- User role: AI Scout
-- Creator ranking: Top Voices
-- Project ranking: AI Opportunity Leaderboard
-- Contribution metric: Adoptionshare
-- Future community layer: TuringScout Network
-
-Avoid:
-
-- TuringDAO as the main V1 product name
-- names that sound derivative of another project in public branding
-- token/points language before trust exists
-- names that imply guaranteed rewards or airdrops
-
-
-## Fast Pitches
-
-### English
-
-> TuringScout ranks AI opportunities worth trying today and credits the scouts and creators who surface them early.
-
-### Chinese
-
-> TuringScout 是一个 AI 项目机会榜：每天发现值得试的 AI 项目，也让最早发现、解释和验证这些机会的 Scout / 创作者被看见。
-
-### Short Chinese
-
-> AI 机会榜 + AI Scout 影响力榜。
-
-### For Projects
-
-> Get discovered by AI users, builders, and creators through source-backed rankings, not fake traffic.
-
-### For Creators
-
-> Find and explain useful AI opportunities early, get credited publicly, and become a visible AI Scout.
-
-
-## Alternative Names
-
-If `TuringScout` cannot be used, the next-best directions are:
-
-| Name | Fit | Notes |
-| --- | --- | --- |
-| TuringSignal | Strong for data/signal, weaker for human scout identity. | Good if the product becomes more analytics-heavy. |
-| TuringScope | Broad and brandable, but less social. | Better for intelligence/report products. |
-| ScoutAI | Very clear, but generic and likely crowded. | Needs stronger availability check. |
-| SignalScout | Captures signal + human discovery. | Less iconic than TuringScout. |
-| AlphaScout | Strong for early opportunities, but can sound crypto/speculation-heavy. | Use cautiously. |
-
-
-## Availability Note
-
-This is not a trademark/legal clearance.
-
-Before final launch, check:
-
-- domain availability
-- GitHub/org handle
-- X/LinkedIn/Telegram handles
-- app/product search
-- trademark database in target markets
-- similar AI/crypto/community products
-
-Working assumption:
-
-- Use `TuringScout` in docs and product planning.
-- Re-run legal/brand availability before public launch.
-
-
-## Sources
-
-- TuringM docs using TuringDAO terminology: https://docs.turingm.com/
-- Reference docs, cookie.fun: https://docs.cookie.community/cookie-dao/cookie.fun
+**文化层面**：
+- 中英文用户都能理解和发音
+- "图灵侦察兵" 作为中文翻译自然
+- 没有文化敏感性或负面联想
+
+---
+
+## 二、命名架构
+
+### 2.1 产品名
+
+| 层级 | 名称 | 说明 |
+|------|------|------|
+| 产品 | **TuringScout** | 主品牌 |
+| 中文 | 图灵侦察兵 / 图灵哨探 | 中文正式名（推荐直接用英文） |
+| 域名 | turingscout.com | 主域名 |
+| 社交媒体 | @TuringScout | Twitter/X 等 |
+
+### 2.2 用户角色命名
+
+| 角色 | 英文 | 说明 |
+|------|------|------|
+| 发现者 | Scout | 提交项目/机会的用户 |
+| 创作者 | Top Voice | V2+ 引入，内容贡献者 |
+| 验证者 | Verifier | 确认/否认机会有效性的用户 |
+| 社区 | TuringScout Network | 未来代币/社区层 |
+
+### 2.3 功能命名
+
+| 功能 | 命名 | 说明 |
+|------|------|------|
+| 排行榜 | Scoutboard | 机会榜 + 项目榜 + Scout 榜 |
+| 积分 | Scout Points (SP) | 未来可兑换代币 |
+| 周报 | TuringScout Weekly | Newsletter 名称 |
+| 创作者榜单 | Top Voices | V2 引入 |
+
+---
+
+## 三、替代方案对比
+
+### 3.1 被排除的命名
+
+| 候选名 | 排除原因 |
+|--------|---------|
+| AICookieDAO | 过于依赖 CookieDAO 品牌，缺乏独立性；DAO 与 V1 产品不匹配 |
+| AIScout | 过于泛化，缺少记忆点 |
+| TuringWatch | "Watch" 过于被动，不如 "Scout" 主动 |
+| AIPulse | Pulse 偏向监测而非发现 |
+| DeepScout | "Deep" 暗示深度学习但太窄化 |
+| ScoutAI | 倒置语序，品牌感弱 |
+| TrendForge | 偏向趋势但不够 AI |
+
+### 3.2 备选方案（仅作保留）
+
+| 名称 | 优点 | 缺点 | 评分 |
+|------|------|------|------|
+| **TuringScout** | 准确、独特、有层次 | — | ⭐⭐⭐⭐⭐ |
+| **AISentry** | 暗示监控和预警 | 军事联想 | ⭐⭐⭐ |
+| **CodeScout** | 开发者友好 | 太窄，不够 AI | ⭐⭐⭐ |
+| **ProjectRadar** | 发现感强 | 不够独特 | ⭐⭐ |
+
+---
+
+## 四、品牌调性
+
+### 4.1 品牌关键词
+- **Intelligence** — 智能和情报双关
+- **Discovery** — 发现而非创造
+- **Trust** — 数据可信赖
+- **Community** — 社区驱动
+- **Open** — 开放透明
+
+### 4.2 品牌声音
+- 理性而非感性
+- 数据驱动而非主观
+- 技术深度而非通俗浅显
+- 社区导向而非中心化
+- 尊重用户智力
+
+### 4.3 Logo 方向建议
+- 图灵机纸带 + 望远镜/双筒镜 的组合图形
+- 抽象化的 "TS" 字母标记
+- 颜色：深蓝 + 亮蓝（已在 UX 规范中定义）
+
+---
+
+## 五、命名使用规范
+
+### 5.1 书写规则
+- 产品名：**TuringScout**（无空格，T 和 S 大写，驼峰）
+- 不要写成：Turing Scout、turingscout、TURINGSCOUT
+- 文件名/代码中：`turingscout` 或 `ts`
+
+### 5.2 用户称呼
+- 称呼用户为 **"Scout"**（侦察兵）
+- 例如："欢迎来到 TuringScout，Scout！"
+- 例如："本周 Top Scouts"
+
+### 5.3 未来扩展
+- 企业产品线：TuringScout for Teams / Enterprise
+- API 产品：TuringScout API
+- 社区：TuringScout Network
+- 代币：Scout Token ($SCOUT) 或 Turing Token ($TURING)

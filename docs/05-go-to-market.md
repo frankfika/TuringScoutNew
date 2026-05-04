@@ -1,267 +1,193 @@
-# 05 Go To Market
+# 05 — 上线推广策略
 
-Canonical status: current source of truth for launch and growth.
+## 一、总体策略
 
+### 核心思路
+**从 AI 机会榜单切入，以"AI 自动更新的免费信息聚合工具"定位获取初始用户，通过内容分发和 SEO 建立流量基础。V1 之后逐步引入 Scout/Creator 社区和代币经济。**
 
-## Initial Wedge
-
-Start as a daily AI opportunity leaderboard.
-
-User promise:
-
-> Come here every day to find AI projects worth trying for free credits, points, bounties, early access, agent demos, or open-source momentum.
-
-Project promise:
-
-> Get discovered by AI hunters and builders from public project signals; submit only if you want to correct, enrich, or feature the listing.
-
-Creator/scout promise:
-
-> Be early, explain useful AI opportunities, get public credit, and become a visible voice in the AI adoption graph.
-
-## Simple Market Narrative
-
-Short version:
-
-> The easiest place to find AI projects worth trying today.
-
-Chinese version:
-
-> 每天帮你找值得薅、值得试、值得关注的 AI 项目机会榜。
-
-Audience-specific:
-
-- For users: "Stop digging through scattered links. Open one board, see the upside, effort, source, and risk, then go directly to the official project."
-- For builders: "Find open-source AI projects, agents, MCP tools, and bounties that are actually active."
-- For creators/scouts: "Explain, validate, correct, or optionally submit early AI opportunities and get credited when your signal helps the project get seen."
-- For projects: "Get discovered from public signals, then optionally update your official listing without buying fake engagement."
-
-## Social Influence Wedge
-
-Influence-led growth comes from a visibility loop:
-
-1. Projects want attention.
-2. Creators want to be seen as early and influential.
-3. Users want trusted shortcuts.
-4. The leaderboard turns scattered attention into public status.
-5. Public status gives creators and projects a reason to share the leaderboard.
-
-TuringScout should adapt this loop without copying crypto mechanics too early:
-
-- V1: public credit, share cards, weekly AI Scouts / Top Voices, project acknowledgements.
-- V2: creator/scout profiles, proof links, contribution history, creator leaderboard.
-- V3: labeled project campaigns and rewards for quality content, tutorials, benchmarks, and qualified adoption.
-
-## Supply Acquisition
-
-Initial sources:
-
-- GitHub trending/search/topics
-- AI GitHub repos and awesome lists
-- Hugging Face public pages
-- ProductHunt AI launches
-- HN AI launch posts
-- Reddit AI communities
-- project websites/docs/blogs
-- public RSS/blog/newsletter archives
-- user/project submissions as optional corrections and gap-fillers
-- submitted X/WeChat/Zhihu links as optional social proof
-
-## Demand Acquisition
-
-Channels:
-
-- SEO category pages
-- weekly AI opportunity report
-- Telegram or newsletter digest
-- X/LinkedIn posts if useful
-- Chinese channels: 微信群, 即刻, 知乎, 小红书, B站, 飞书群
-- creator reposts of leaderboard cards
-- project teams sharing ranking badges
-- creators sharing or optionally submitting "I found/explained this" links
-- project teams acknowledging top creators/scouts
-
-## Content Formats
-
-Daily:
-
-- top 5 AI opportunities today
-- new free credits
-- new AI agent trials
-- new GitHub AI projects worth watching
-
-Weekly:
-
-- AI opportunity leaderboard
-- top AI scouts / top voices of the week
-- fastest-growing open-source AI projects
-- best AI free credits
-- new possible AI airdrops/points
-- best AI bounties for builders
-
-Monthly:
-
-- AI adoption trend report
-- agent ecosystem report
-- open-source AI momentum report
-
-## Project Outreach
-
-Trigger outreach when:
-
-- project ranks for the first time
-- project rises quickly
-- project receives meaningful clicks
-- project has an unclear but promising opportunity
-- project has free credits/bounty/agent demo but poor listing quality
-- creator/scout publishes useful content about a ranked project
-- project has active creator discussion but no official opportunity page
-
-Message angle:
-
-```text
-Hey {name}, your project appeared on TuringScout's {category} leaderboard this week.
-
-We track AI projects and opportunities from GitHub, official websites, public sources, and optional community signals. Your project ranked because {reason}.
-
-If you want, you can submit official details or update the listing here: {link}.
+### 增长飞轮
+```
+数据自动聚合 → SEO 流量 → 用户增长
+→ 品牌建立 → 外部引用 → 更多流量
+→ V1.5 引入 Scout → 数据更全面 → 价值更高
 ```
 
-Creator recognition angle:
+---
 
-```text
-Hey {name}, your post helped surface {project} on TuringScout's {category} leaderboard this week.
+## 二、启动切入点
 
-We credited you as a useful voice because {reason}.
+### 2.1 种子用户获取（前 30 天）
 
-You can share the ranking card here: {link}.
+**目标**：获取前 500 个 DAU
+
+**渠道和策略**：
+
+| 渠道 | 策略 | 预期效果 |
+|------|------|---------|
+| **HN Show HN** | 发布 Show HN 帖子，标题"AI Opportunity Board — Track free credits, bounties, and trending AI projects" | 核心用户群精准触达 |
+| **Reddit r/MachineLearning** | 以"我做了个聚合 AI 机会的工具"角度分享 | 技术社区扩散 |
+| **Twitter/X** | @ AI KOL，请他们试用和反馈 | 社交传播 |
+| **GitHub** | 在热门的 AI 项目 Issue/Discussion 中自然提及 | 开发者触达 |
+| **即刻/知乎** | 中文社区同步推广 | 中文用户获取 |
+
+### 2.2 内容策略
+
+**V1 上线时准备的内容**：
+
+| 内容类型 | 标题示例 | 分发渠道 |
+|---------|---------|---------|
+| 上线公告 | "TuringScout 上线了 — AI 项目机会聚合平台" | 官方 Blog、Twitter |
+| 使用指南 | "如何用 TuringScout 每天发现 3 个 AI 机会" | Blog、知乎 |
+| 数据报告 | "2026年5月 AI 开源项目趋势报告" | Newsletter、社交媒体 |
+| 案例分享 | "我通过 TuringScout 发现的 5 个好项目" | Twitter Thread |
+
+---
+
+## 三、供给端策略
+
+### 3.1 数据覆盖计划
+
+**第一阶段（上线前）：**
+- GitHub Trending：AI 相关 repos，日更新
+- Hacker News：Show HN AI 相关，日更新
+- Hugging Face：Trending models，日更新
+
+**第二阶段（上线后 30 天）：**
+- ProductHunt AI 分类
+- Reddit r/MachineLearning 热门讨论
+- 知乎 AI 话题热门
+
+**第三阶段（上线后 60 天）：**
+- Twitter AI KOL 提及的项目
+- ArXiv 论文关联项目
+- 用户提交项目入库
+
+### 3.2 数据扩展计划
+
+V1 仅使用 Tier 1 数据源（GitHub + HN + HuggingFace）。V1.5 扩展到 Tier 2（ProductHunt + Reddit）。V2 引入 Scout 用户提交。
+
+---
+
+## 四、需求端策略
+
+### 4.1 SEO 策略
+
+**关键词矩阵**：
+
+| 关键词类型 | 关键词示例 | 落地页 |
+|-----------|-----------|--------|
+| 核心词 | "AI 项目排行榜"、"AI 趋势" | 首页 |
+| 分类词 | "免费 AI API"、"AI 空投"、"AI Bounty" | 分类页面 |
+| 长尾词 | "2026年值得关注的 AI 开源项目" | 项目详情页 |
+| 品牌词 | "TuringScout" | 首页 |
+
+**SEO 技术实施**：
+- 服务端渲染（Next.js SSR）
+- 动态 sitemap.xml 生成
+- 结构化数据标记（JSON-LD）
+- 页面 Meta 标签优化
+- 分类页、项目详情页静态生成
+
+### 4.2 内容分发
+
+| 渠道 | 频率 | 内容形式 |
+|------|------|---------|
+| **Telegram Channel** | 每日 | 今日 Top 5 机会推送 |
+| **Twitter/X** | 每日 | Top 机会卡片 + 简要分析 |
+| **Newsletter** | 每周 | 周报：趋势分析 + 机会汇总 |
+| **知乎专栏** | 每周 | 深度分析文章 |
+| **即刻** | 每日 | 碎片化更新 |
+
+### 4.3 社交媒体内容模板
+
+**Twitter 帖子模板**：
+```
+🔥 今日 AI 机会发现：
+
+1. [项目名] - [机会描述]
+   ⭐ 12.5k | 🆓 免费 | ✅ 已验证
+
+2. [项目名] - [机会描述]
+   ⭐ 8.2k | 🎁 积分 | ⏰ 3天后截止
+
+更多 → turingScout.com
 ```
 
-Paid angle later:
+---
 
-```text
-We can also feature your launch or create a lightweight adoption campaign for developers/builders if you are actively looking for early users.
-```
+## 五、增长策略（非 Scout 路线）
 
-## Monetization Sequence
+V1 没有用户系统，增长完全依赖内容和 SEO。
 
-Do not monetize before rankings have basic trust.
+### 5.1 内容驱动增长
 
-Sequence:
+- 周报是新用户获取的核心渠道
+- Twitter 每日分享 Top 机会卡片
+- 知乎专栏发布 AI 趋势分析文章（引用 TuringScout 数据）
+- Telegram Channel 每日推送精选机会
 
-1. free curated listings
-2. labeled featured slots
-3. weekly digest sponsorship
-4. launch boost package
-5. project report
-6. developer adoption sprint
-7. campaign packages
-8. project dashboard / category intelligence
-9. data/API products for teams, investors, and agents
+### 5.2 社交分享
 
-Business logic:
+- 每个机会详情页有分享按钮（复制链接 / Twitter）
+- OG Image 自动生成（机会标题 + 项目名 + 类型图标）
+- 用户分享出去的链接就是最好的广告
 
-- Listings create traffic.
-- Traffic creates owned click data; optional submissions/corrections improve quality.
-- Scout/creator credit creates distribution and contribution data.
-- Project acknowledgements and corrections create relationship data.
-- Reports, dashboards, campaigns, and APIs monetize that data layer.
+### 5.3 认可机制
 
-## Early Pricing Hypothesis
+- 周报中定期做"本周最热 AI 项目"盘点
+- Twitter 官方账号定期 shout-out
+- 未来 V2-V3：创作者勋章、专属频道
 
-Start lower until traffic and trust are proven:
+---
 
-- Manual featured/listing pilot: $99-$299/week
-- Featured listing after traffic proof: $299-$999/week
-- Newsletter/digest sponsor: $299-$1,500
-- Launch boost: $999-$2,500
-- Developer adoption sprint: $2,000-$5,000
-- Custom report: $500-$3,000
-- Project dashboard / API pilot: custom, only after enough data exists
+## 六、盈利节奏
 
-## Trust Rules
+| 阶段 | 时间 | 盈利方式 | 预期收入 |
+|------|------|---------|---------|
+| **完全免费** | 月 1-3 | 无盈利，专注增长 | $0 |
+| **标记广告位** | 月 4-6 | 首页"推广项目"标记位 | $500-2000/月 |
+| **周报赞助** | 月 4-6 | Newsletter 赞助位 | $500-1500/月 |
+| **Launch Boost** | 月 7-12 | 项目方付费推广（榜单优先展示） | $2000-5000/月 |
+| **企业报告** | 月 7-12 | 定制化 AI 趋势报告 | $1000-5000/份 |
+| **API 开放** | 月 12+ | API 付费调用 | 按量计费 |
 
-- paid placement must be labeled
-- organic ranking cannot be bought
-- verified badge cannot be bought
-- do not guarantee GitHub stars
-- do not guarantee airdrops
-- do not encourage spam posting
-- route users to official links
+---
 
-## First 30 Days
+## 七、前 30 天执行计划
 
-Week 1:
+### Week 1：预热
+- [ ] 社交媒体账号创建（Twitter、Telegram、知乎）
+- [ ] 邀请 5-10 位内测用户
+- [ ] 准备上线内容（Blog 文章、截图、视频）
+- [ ] SEO 基础配置完成
 
-- seed 50-100 projects/opportunities
-- save raw evidence for every published listing
-- launch core leaderboard pages
-- launch optional correction/submit page
-- launch click tracking
+### Week 2：软启动
+- [ ] Hacker News Show HN 发布
+- [ ] 内测用户反馈收集和修复
+- [ ] 数据源全部开启，验证稳定性
+- [ ] Reddit / 知乎发布介绍帖
 
-Week 2:
+### Week 3：正式上线
+- [ ] 正式发布公告
+- [ ] 第一期 Newsletter 发送
+- [ ] 监控用户增长和留存数据
 
-- add GitHub enrichment
-- add AI extraction/risk labels
-- publish first weekly report
-- start project notifications
-- credit early scouts/creators on selected listings
+### Week 4：迭代优化
+- [ ] 根据第一周数据分析漏斗
+- [ ] 优化首页转化率
+- [ ] 扩大内容分发渠道
+- [ ] 发布第一次周报
+- [ ] 开始联系项目方进行 Launch Boost 试点
 
-Week 3:
+---
 
-- improve category pages
-- add share cards
-- recruit early hunters/builders
-- recruit 20-30 AI scouts/creators
-- collect project corrections
+## 八、关键指标
 
-Week 4:
-
-- test featured listings
-- publish first trend report
-- contact ranked projects
-- publish first Top AI Scouts / Top Voices list
-- identify first paid pilot candidates
-
-## Success Signals
-
-User-side:
-
-- repeat visitors
-- outbound clicks
-- optional submissions/corrections
-- subscriptions
-- shares
-
-Creator-side:
-
-- social proof discovered or submitted
-- creator reposts of ranking cards
-- creators asking to be credited or corrected
-- repeat creator submissions
-- project acknowledgements of creator coverage
-
-Project-side:
-
-- projects submit official links/corrections when useful
-- projects ask to update listings
-- projects share rankings
-- projects ask about featured/report options
-
-Business-side:
-
-- first sponsored inquiry
-- first paid pilot
-- first repeat project interest
-
-## Early GTM Experiments
-
-Run small experiments before scaling content:
-
-- SEO: publish 5-8 category pages targeting concrete intents like "AI free credits", "AI agent trials", "MCP tools", and "open-source AI leaderboard".
-- Community: share one daily top-5 list in 3-5 focused AI/builder communities and track which format gets clicks.
-- Project outreach: contact 20 ranked projects with a correction/update link and measure response rate.
-- Creator loop: invite 20 creators/scouts to explain, correct, share, or optionally submit opportunities; credit the best 5-10 publicly and measure repost rate.
-- Social recognition: publish a weekly Top AI Scouts/Top Voices post before launching any reward system.
-- Report signal: send 5 projects a free mini-report showing rank, clicks, creator mentions, and missing official info; measure replies.
-- Monetization signal: test 3 clearly labeled featured slots only after organic rankings feel trustworthy.
+| 指标 | 30 天目标 | 90 天目标 |
+|------|----------|----------|
+| DAU | 500 | 2000 |
+| 页面浏览量 | 5000/天 | 20000/天 |
+| Newsletter 订阅 | 200 | 2000 |
+| Twitter 关注 | 500 | 3000 |
+| SEO 流量占比 | 20% | 50% |
+| 回访率（7日） | 15% | 30% |

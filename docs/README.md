@@ -1,57 +1,72 @@
-# TuringScout Docs
+# TuringScout 文档索引
 
-This folder is intentionally small and canonical.
+## 阅读顺序
 
-## Read Order
+推荐按编号顺序阅读，每个文档建立在前一个文档的基础上：
 
-1. `00-overview.md` - what TuringScout is and why it exists
-2. `01-product-roadmap.md` - V0-V5 roadmap and version boundaries
-3. `02-v1-prd.md` - V1 product requirements
-4. `03-v1-system-design.md` - V1 system/data/automation design
-5. `04-v1-ux-spec.md` - V1 user experience and page logic
-6. `05-go-to-market.md` - launch, growth, and monetization plan
-7. `06-feasibility-research.md` - feasibility, risks, and validation plan
-8. `07-social-influence-loop.md` - TuringScout social influence mechanism
-9. `08-naming.md` - naming rationale and alternatives
-10. `09-product-engineering-spec.md` - developer-facing product and engineering spec
-11. `10-development-plan.md` - development milestones, sprints, and implementation plan
+| 编号 | 文档 | 核心内容 | 目标读者 |
+|------|------|---------|---------|
+| 00 | [产品定位与核心价值](./00-产品定位与核心价值.md) | 一句话定位、用户画像、功能矩阵、商业模式、KPI | 所有人 |
+| 01 | [产品路线图](./01-product-roadmap.md) | V0-V5 各版本目标和边界 | 产品/策略 |
+| 02 | [V1 产品需求文档](./02-v1-prd.md) | 用户画像、功能优先级、页面清单、验收条件 | 产品/设计/开发 |
+| 03 | [V1 系统设计](./03-v1-system-design.md) | 数据流、数据模型、评分算法、数据源策略 | 后端/架构 |
+| 04 | [V1 UX 规范](./04-v1-ux-spec.md) | 页面布局、交互设计、标签系统 | 设计/前端 |
+| 05 | [上线推广策略](./05-go-to-market.md) | 启动切入点、增长策略、内容分发、盈利节奏 | 运营/市场 |
+| 06 | [可行性评估](./06-feasibility-research.md) | 技术/数据/市场可行性、风险分析 | 决策者 |
+| 07 | [社交影响力循环](./07-social-influence-loop.md) | Scout/创作者信用机制、排行榜联动、飞轮设计 | 产品/社区 |
+| 08 | [命名逻辑](./08-naming.md) | TuringScout 命名原理和替代方案 | 所有人 |
+| 09 | [开发工程规范](./09-product-engineering-spec.md) | 页面拆分、数据表设计、API 设计、状态流转、评分规则 | 开发 |
+| 10 | [开发计划](./10-development-plan.md) | 里程碑、迭代周期、任务拆分、验收标准 | 开发/PM |
 
-## Canonical Rule
+## V1 核心规则摘要
 
-The `00-10` docs are the current source of truth.
+以下是从各文档中提炼的 V1 必须遵守的核心规则：
 
-`archive/` contains historical notes. If an archived doc conflicts with a canonical doc, the canonical doc wins.
+### 核心设计原则
 
-## V1 Summary
+**列表页极简，详情页 AI 深度点评。**
 
-V1 is an automation-first AI OPC leaderboard engine with GitHub intelligence, raw evidence storage, and lightweight scout/creator credit. Submissions are optional inputs, not the operating backbone.
+- 列表只展示：类型图标 + 项目名-标题 + 一句话描述 + 时间
+- 不展示评分数字、不展示多套标签
+- 详情页核心模块：AI 自动生成的深度点评（亮点 + 适合谁 + 同类对比 + 打分解读）
+- AI 点评是 TuringScout 的核心壁垒，不是又一个 AI 工具目录
+- 唯一目标用户：普通 AI 关注者（打开浏览器就能看，无需学习）
 
-It helps opportunity hunters quickly find AI projects worth trying, claiming, starring, testing, or following.
+### 机会类型（用户可见）
 
-V1 avoids:
+仅 4 个类型，列表上用 emoji 区分：
 
-- heavy social crawling
-- wallet/token mechanics
-- reward escrow
-- fake growth
-- mandatory login before browsing
+| 图标 | 类型 | 含义 |
+|------|------|------|
+| 🆓 | 免费试用 | 注册送额度、免费体验 |
+| 📦 | 开源项目 | 值得关注的 AI 开源项目 |
+| 🎁 | 积分奖励 | 做任务领积分、空投 |
+| 🏆 | 奖金竞赛 | Hackathon、Bounty |
 
-V1 should still include a lightweight social loop:
+### 数据来源优先级
+1. **Tier 1（自动抓取）**：GitHub Trending、Hugging Face、Hacker News
+2. **Tier 2（按需抓取）**：ProductHunt、Reddit、Twitter、知乎
+3. **Tier 3（用户提交）**：Scout 提交 + URL 自动抽取
 
-- public credit for scouts/creators who discover, submit, correct, or explain opportunities
-- shareable ranking cards
-- weekly creator/scout recognition
-- project update and repost prompts
+### 评分维度（后台排序用，不展示给用户）
+- 机会价值 + 可信度 + 热度动量 + 易用性 + 时效性 + AI 相关性 - 风险扣分
 
-The strategic rule:
+### 内容流转
+```
+Source → RawEvidence → Extraction → Project/Opportunity → Scoring → Ranking → Publishing
+```
 
-> The leaderboard is the surface. The evidence graph is the moat. Scout/creator status is the growth loop. Adoptionshare and project intelligence are the future business model.
+### 代币经济（V1 不启用）
+- V1 阶段不部署代币合约，仅设计积分系统
+- 积分作为未来代币空投的依据
 
-## Developer Handoff
+### 审核策略
+- 所有机会由 AI 自动抓取并抽取，进入候选池
+- 低风险机会（免费、开源、多源验证）：自动发布
+- 中风险机会（需注册、单一来源）：管理员抽样审核
+- 高风险机会（付费、需 KYC）：管理员全部审核
+- V1 不接受用户提交
 
-For implementation, start with:
+## 归档文档
 
-1. `09-product-engineering-spec.md`
-2. `10-development-plan.md`
-3. `03-v1-system-design.md`
-4. `02-v1-prd.md`
+早期探索和讨论文档，保留供参考，见 [archive/README.md](./archive/README.md)。

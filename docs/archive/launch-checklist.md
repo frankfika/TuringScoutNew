@@ -1,57 +1,69 @@
-# Launch Checklist
+# 上线检查清单
 
-## Product
+> 归档说明：本文档是早期上线检查清单，已被 10-development-plan.md 中更详细的上线前验证标准替代。
 
-- [ ] Create public opportunity feed
-- [ ] Create project detail page
-- [ ] Create task detail page
-- [ ] Create leaderboard page
-- [ ] Create submit project form
-- [ ] Add outbound click tracking with UTM
-- [ ] Add basic admin data source
-- [ ] Add optional newsletter/Telegram subscription
-- [ ] Add sponsored/featured label
-- [ ] Add report suspicious task button
+## 技术检查
 
-## Initial Content
+- [ ] 生产数据库迁移成功
+- [ ] 所有环境变量配置正确（生产和本地不同）
+- [ ] Cron 任务在生产环境正常运行
+- [ ] SSL 证书有效
+- [ ] CDN 配置正确
+- [ ] 静态资源压缩和缓存策略配置
+- [ ] 错误监控（Sentry）已配置
+- [ ] 日志系统上线
 
-- [ ] Curate 50 AI opportunities
-- [ ] Tag each by reward type and task type
-- [ ] Add risk/credibility notes
-- [ ] Pick 10 featured examples
-- [ ] Create first weekly leaderboard
-- [ ] Prepare 7 daily social posts
+## 功能检查
 
-## Project Outreach
+- [ ] 首页正常加载，数据正确展示
+- [ ] 分类榜单页筛选和排序正常工作
+- [ ] 项目详情页信息完整
+- [ ] 机会详情页 CTA 按钮跳转正确
+- [ ] 提交表单可正常提交
+- [ ] 后台管理可登录和操作
+- [ ] 数据源自动抓取正常
+- [ ] 评分计算正常
 
-- [ ] Build list of 100 AI projects
-- [ ] Prioritize projects with credits, waitlists, GitHub repos, agent products, points, hackathons, or bounties
-- [ ] Send 30 free-listing DMs
-- [ ] Offer 5 paid pilot packages
-- [ ] Ask each project for official task links and reward details
+## 性能检查
 
-## User Acquisition
+- [ ] 首页加载时间 < 3s（P95）
+- [ ] API 响应时间 < 500ms（P95）
+- [ ] Lighthouse 评分 > 90
+- [ ] 移动端无横向滚动
+- [ ] 图片均已优化和压缩
 
-- [ ] Launch Telegram channel
-- [ ] Launch weekly newsletter
-- [ ] Post first X thread
-- [ ] Post Chinese launch note on 即刻/小红书/微信群
-- [ ] Recruit 20 early hunters/builders
-- [ ] Ask early users to submit opportunities
+## 安全检查
 
-## Monetization
+- [ ] 无 SQL 注入漏洞
+- [ ] 无 XSS 漏洞
+- [ ] CSRF 保护到位
+- [ ] API 限流已配置
+- [ ] 管理接口受保护
+- [ ] `.env` 文件未提交到 Git
+- [ ] 依赖无已知漏洞
 
-- [ ] Define free listing rules
-- [ ] Define featured listing price
-- [ ] Define launch boost package
-- [ ] Define developer adoption sprint package
-- [ ] Create simple campaign report template
+## 内容检查
 
-## Trust And Compliance
+- [ ] 种子数据 ≥ 50 条
+- [ ] 数据质量经过人工抽检
+- [ ] 所有页面 Meta 标签正确
+- [ ] sitemap.xml 正确生成
+- [ ] robots.txt 配置正确
+- [ ] OG 标签（社交分享预览）正确
 
-- [ ] No guaranteed GitHub star wording
-- [ ] No paid spam task wording
-- [ ] Require disclosure for sponsored content tasks
-- [ ] Mark unclear rewards as unverified
-- [ ] Add scam/report workflow
-- [ ] Add privacy note for optional login
+## 运营检查
+
+- [ ] 社交媒体账号就绪
+- [ ] 上线公告内容准备完毕
+- [ ] Newsletter 系统配置完成
+- [ ] 反馈渠道（Email/表单）可用
+- [ ] 隐私政策页面上线
+- [ ] 联系信息准确
+
+## 上线后 24 小时检查
+
+- [ ] 所有系统正常运行
+- [ ] 用户反馈收集（表单/邮件/社交媒体）
+- [ ] 无严重错误（检查 Sentry）
+- [ ] 数据更新正常（检查 Cron 执行日志）
+- [ ] 社交媒体推广启动

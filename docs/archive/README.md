@@ -1,22 +1,17 @@
-# Archive
+# 归档文档说明
 
-This folder contains historical brainstorming notes and earlier drafts.
+本目录存放 TuringScout 早期探索阶段的文档草稿，保留供参考。
 
-Canonical docs live one level up as `00-05` documents. If anything here conflicts with a canonical doc, ignore the archived version.
+这些文档反映的是产品方向探索过程中的中间产物，其中一些假设和结论可能已被后续文档修正或替代。**以 `docs/` 目录下的正式规范文档为准。**
 
-## Why Keep These Files
+## 归档文档列表
 
-They preserve the reasoning behind the current direction, including:
-
-- CookieDAO business logic research
-- OPC platform thinking
-- AI automation and OpenClaw agent ideas
-- low-cost/free-first execution options
-- early MVP and GTM drafts
-- task taxonomy and opportunity examples
-
-## When To Use Archive Docs
-
-Use these only when you need background context or want to recover an idea that was intentionally left out of V1.
-
-Do not use archive docs as implementation source of truth.
+| 文件 | 说明 | 与正式文档的关系 |
+|------|------|-----------------|
+| `cookiedao-core-logic.md` | CookieDAO 模式分析和借鉴逻辑 | 核心洞察已融入 00、07 号文档 |
+| `demand-research.md` | 早期需求调研笔记 | 调研结论已融入 02、06 号文档 |
+| `mvp-spec.md` | MVP 早期方案草稿 | 被 02、03 号文档替代 |
+| `one-page-prd.md` | 一页纸 PRD 草稿 | 被 02 号文档扩展替代 |
+| `product-roadmap.md` | 早期路线图讨论 | 被 01 号文档替代 |
+| `opportunity-examples.md` | 机会发现/项目示例 | 作为分类体系的参考素材 |
+| `launch-checklist.md` | 上线检查清单 | 被 10 号文档的上线前 7 天计划替代 |

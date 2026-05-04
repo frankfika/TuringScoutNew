@@ -1,596 +1,252 @@
-# 03 V1 System Design
+# 03 — V1 系统设计
 
-Canonical status: current source of truth for V1 technical logic.
+## 一、数据流架构
 
+### 1.1 整体数据流
 
-## Goal
-
-Build a low-cost, automation-first, evidence-first pipeline that turns public sources and GitHub data into ranked AI opportunities with minimal human operation.
-
-## System Principle
-
-Every listing should be source-backed.
-
-Every AI summary, score, label, and risk note should trace to evidence.
-
-## V1 Data Flow
-
-```text
-Source registry + public sources + optional user/project/creator submissions
-  -> Raw evidence store
-  -> AI extraction
-  -> Project / Opportunity / CreatorContent candidates
-  -> Entity resolution and deduplication
-  -> GitHub / website / link graph enrichment
-  -> Scoring engine + risk engine
-  -> Review queues
-  -> Public leaderboards and pages
-  -> Scout/creator credit + share cards
-  -> Outbound click and submission tracking
-  -> Ranking/report/outreach feedback loop
+```
+┌──────────┐    ┌─────────────┐    ┌────────────┐    ┌──────────────────┐
+│  Source  │───→│ RawEvidence  │───→│ Extraction  │───→│ Project/         │
+│ (数据源)  │    │ (原始证据)    │    │ (AI信息抽取) │    │ Opportunity      │
+└──────────┘    └─────────────┘    └────────────┘    │ (项目/机会)       │
+                                                     └────────┬─────────┘
+                                                              │
+┌──────────┐    ┌─────────────┐    ┌────────────┐    ┌───────┴─────────┐
+│Publishing│←───│  Ranking    │←───│  Scoring    │←───│ Evidence        │
+│ (发布)    │    │ (排序)       │    │ (评分)       │    │ (指标数据)       │
+└──────────┘    └─────────────┘    └────────────┘    └─────────────────┘
 ```
 
-## Core Concepts
-
-- `Source`: configured source or source family where discovery can happen.
-- `RawEvidence`: immutable raw/source-backed discovery record before AI processing.
-- `Evidence`: cleaned, linked, and summarized source record attached to a project/opportunity/content item.
-- `Project`: canonical AI project profile.
-- `Opportunity`: reward/task/launch opportunity tied to a project.
-- `GithubMetricSnapshot`: time-series GitHub metrics.
-- `LinkGraphEdge`: relationship between project, opportunity, source, creator content, and outbound links.
-- `ScoreSnapshot`: ranking score and explanation over time.
-- `RiskAssessment`: risk labels, review triggers, and risk rationale.
-- `ReviewQueueItem`: items needing human review.
-- `OutboundClick`: internal click/interest signal.
-- `Submission`: optional user/project submitted URL, correction, risk report, or creator credit input.
-- `Creator`: optional scout/creator identity, initially lightweight and platform-agnostic.
-- `CreatorContent`: post/thread/video/article/tutorial submitted as social proof.
-- `CreatorScoreSnapshot`: quality-weighted influence contribution over time.
-- `ProjectAcknowledgement`: project-side repost, reply, correction, or official acknowledgement.
-
-## Minimal Data Requirements
-
-### Project
-
-Required fields:
-
-- name
-- slug
-- short summary
-- category/tags
-- official website URL if available
-- GitHub URL if available
-- status: draft / published / hidden / archived
-- trust label
-- risk notes
-- last checked time
-
-Useful optional fields:
-
-- docs URL
-- blog URL
-- Hugging Face URL
-- ProductHunt/HN/Reddit/source URLs
-- contact or submitter email
-- logo/image
-- similar projects
-
-### Opportunity
-
-Required fields:
-
-- project reference
-- opportunity title/hook
-- opportunity type
-- reward/upside type
-- estimated time
-- difficulty
-- task steps
-- primary CTA URL
-- source/evidence URLs
-- trust label
-- risk labels
-- score and score explanation
-- status: draft / review / published / expired / rejected
-- last checked time
-
-Useful optional fields:
-
-- expiration date
-- eligibility region
-- account/login requirement
-- wallet requirement
-- sponsor/featured flag
-- review reason
-- admin notes
-
-
-### Raw Evidence
-
-Required fields:
-
-- source type
-- source name
-- source URL
-- discovered time
-- fetched time when available
-- raw title
-- raw text excerpt or cleaned text when available
-- raw HTML/JSON snapshot optional
-- author/source account when available
-- published time when known
-- linked URLs
-- language
-- fetch status
-- checksum/hash
-
-Reasons to keep raw evidence:
-
-- avoid repeated fetching
-- preserve provenance
-- support audit/reprocessing
-- reduce AI hallucination
-- enable future reports and attribution
-
-### Evidence
-
-Required fields:
-
-- source type
-- source URL
-- fetched/submitted time
-- raw title/description when available
-- extracted text or summary
-- confidence score
-- linked project/opportunity candidate
-
-### Creator / Scout
-
-Required fields for lightweight V1 credit:
-
-- display name or handle
-- submitted URL or content URL
-- platform/source type
-- public attribution preference
-- linked project/opportunity
-- status: pending / visible / hidden / rejected
-
-Useful optional fields:
-
-- contact email
-- avatar
-- profile URL
-- role: scout / creator / researcher / project member
-- notes
-- quality score
-
-### Creator Content
-
-Required fields:
-
-- creator reference when available
-- content URL
-- platform/source type
-- linked project/opportunity
-- extracted title/summary
-- content type: post / thread / video / article / tutorial / benchmark / review / correction
-- quality label
-- risk/spam label
-- submitted time
-
-## Source Strategy
-
-Tier 1: automated free / low-cost / high-signal backbone:
-
-- GitHub search, trending, topics, repo API, awesome lists
-- official project websites
-- official docs/blogs/RSS
-- Hugging Face public pages
-
-Tier 2: selective public discovery and evidence:
-
-- HN public search/pages
-- ProductHunt public pages/manual importer
-- Reddit public/RSS links where allowed and practical
-- Dev.to, Medium/Substack/company blog public archives
-- arXiv / Papers with Code for research-to-product signals
-
-Tier 3: optional submitted/manual evidence:
-
-- user-submitted URLs
-- project-submitted URLs
-- submitted X links
-- submitted WeChat/Zhihu/Bilibili/Xiaohongshu/Jike links
-- submitted Discord/Telegram links
-- submitted creator posts, videos, tutorials, benchmarks, or reviews
-
-Do not claim complete coverage of X, WeChat, Zhihu, Reddit, or the entire AI market in V1.
-
-Practical rule:
-
-> Monitor a small number of high-signal sources deeply. Submissions and scout/creator links are optional corrections, credits, and gap-fillers, not the operating backbone.
-
-## Source Registry
-
-Each source should be tracked in a lightweight registry so discovery can become agent-driven later.
-
-Required fields:
-
-- source name
-- source type
-- source URL or query template
-- category mapping
-- priority: high / medium / low
-- frequency: daily / weekly / manual
-- fetch method: API / RSS / public page / submitted only / manual
-- allowed use notes
-- last checked time
-- enabled flag
-
-Initial registry examples:
-
-- GitHub query: `AI agent`, `MCP server`, `RAG`, `LLM app`, `coding agent`, `eval framework`, `vector database`, `browser agent`
-- HN query: `Show HN AI`, `AI agent`, `MCP`, `open source AI`
-- Hugging Face: trending Spaces, models, datasets related to agents/tools
-- ProductHunt: AI launches via manual/import flow
-- Chinese/social: submitted links and manual weekly curation only
-
-## Entity Resolution And Deduplication
-
-Use deterministic matching first:
-
-- same official domain
-- same GitHub URL
-- same Hugging Face org/model/space URL
-- same normalized project name
-- same official social handle
-- same canonical docs or product URL
-
-Then use AI-assisted fuzzy matching:
-
-- similar names
-- similar descriptions
-- shared founders/team mentions
-- shared logo/title metadata
-- overlapping source links
-
-Candidate outcomes:
-
-- new project
-- duplicate of existing project
-- new opportunity for existing project
-- duplicate opportunity
-- ambiguous, needs review
-
-Ambiguous merges must go to human review.
-
-## Enrichment Jobs
-
-### GitHub Enrichment
-
-Collect:
-
-- stars
-- forks
-- watchers
-- open issues
-- pull requests if practical
-- contributors count if practical
-- releases
-- topics
-- README summary
-- license
-- last commit / last pushed
-- created and updated dates
-
-Derived metrics:
-
-- star velocity
-- fork velocity
-- recent activity score
-- contributor growth proxy
-- release freshness
-- issue health
-- maintainer responsiveness proxy
-- repo credibility score
-
-### Website Enrichment
-
-Collect:
-
-- title and meta description
-- docs/pricing/free tier/API pages
-- GitHub/Hugging Face links
-- RSS/blog links
-- waitlist or credits page
-- terms/reward clarity signals
-
-### Link Graph Enrichment
-
-Track relationships:
-
-- Project -> GitHub repo
-- Project -> opportunities
-- Project -> official/social/source links
-- Opportunity -> source evidence
-- Opportunity -> creator content
-- CreatorContent -> project/opportunity
-- Submission -> project/opportunity/content
-
-## AI Responsibilities
-
-AI should:
-
-- extract project/opportunity fields from URLs
-- summarize source pages
-- classify opportunity type
-- generate tags
-- estimate difficulty and time
-- create risk labels
-- explain ranking rationale
-- draft SEO metadata and digest copy
-- suggest duplicate matches
-- classify creator/social proof content
-- draft share cards and creator/project notification copy
-- detect low-quality, spammy, or unsupported creator claims
-
-AI should not final-approve:
-
-- speculative airdrops
-- wallet/token tasks
-- high-value unclear rewards
-- sponsored placements
-- homepage top placements
-- project correction disputes
-- creator score disputes
-- paid or reward-bearing creator campaign results
-
-## Review Rules
-
-Auto-publish is allowed when:
-
-- source is official or high-confidence public GitHub/open-source evidence
-- risk score is low
-- no wallet/private key request
-- no fake-star/spam wording
-- not sponsored
-- not homepage top placement
-
-Human review is required when:
-
-- reward is high but unclear
-- airdrop/token/wallet is mentioned
-- official source is missing
-- AI confidence is low
-- duplicate match is ambiguous
-- item is sponsored or paid
-- user reports risk
-- item enters homepage top placements
-- creator content includes reward claims, attacks, financial advice, or suspicious engagement
-- creator/scout credit affects a public weekly top list
-
-## Ranking Logic
-
-Core components:
-
-- opportunity value
-- credibility
-- momentum
-- ease
-- freshness
-- AI relevance
-- capped user interest
-- capped social proof
-- risk penalty
-
-User interest and social proof signals must be abuse-aware. Clicks, submissions, and creator posts cannot dominate rankings.
-
-## V1 Scoring Formula
-
-Use a simple explainable score first, then tune with real data:
-
-```text
-organic_score =
-  0.25 * opportunity_value
-+ 0.20 * credibility
-+ 0.15 * momentum
-+ 0.15 * ease
-+ 0.10 * freshness
-+ 0.10 * AI_relevance
-+ 0.03 * capped_user_interest
-+ 0.02 * capped_social_proof
-- risk_penalty
+### 1.2 各阶段说明
+
+| 阶段 | 输入 | 输出 | 频率 | 说明 |
+|------|------|------|------|------|
+| **采集** | GitHub/HN API | RawEvidence | Tier1: 1h; Tier2: 6h | 原始数据抓取和存储 |
+| **抽取** | RawEvidence | Extraction | 实时（采集后触发） | 结构化信息提取 |
+| **充实** | Extraction + 已有数据 | Project/Opportunity | 实时 | 去重、合并、补全 |
+| **AI 点评** | Project/Opportunity 数据 | AIReview | 充实后异步触发 | AI 自动生成亮点/适合谁/对比/打分解读 |
+| **评分** | Project/Opportunity + 指标 + AIReview | ScoreSnapshot | 每次充实后 | 多维评分计算 |
+| **排序** | ScoreSnapshot | Ranking | 评分后 | 分类排序 |
+| **发布** | Ranking + 审核结果 | 对外展示 | 排序后 | 低风险自动，高风险人工 |
+
+---
+
+## 二、核心数据模型
+
+### 2.1 Source（数据源）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| name | String | 数据源名称，如 "GitHub Trending" |
+| url | String | 数据源 URL |
+| type | Enum | GITHUB_TRENDING / GITHUB_SEARCH / HN_SHOW / HUGGING_FACE / PRODUCT_HUNT / REDDIT / TWITTER / ZHI_HU / ARXIV |
+| tier | Enum | TIER_1 / TIER_2 / TIER_3 |
+| enabled | Boolean | 是否启用 |
+| schedule | String | Cron 表达式，如 "0 * * * *" |
+| lastRunAt | DateTime | 上次执行时间 |
+| lastStatus | Enum | SUCCESS / FAILURE / PENDING |
+| config | JSON | 额外配置（API Key、参数等） |
+
+### 2.2 RawEvidence（原始证据）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| sourceId | UUID → Source | 来源 |
+| url | String | 原始 URL |
+| rawData | JSON | 原始响应数据 |
+| fingerprint | String | 内容指纹（用于去重） |
+| status | Enum | PENDING / EXTRACTED / DUPLICATE / FAILED |
+| collectedAt | DateTime | 采集时间 |
+
+### 2.3 Project（项目）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| slug | String (unique) | URL 友好标识 |
+| name | String | 项目名称 |
+| description | Text | 项目描述 |
+| url | String | 项目主 URL |
+| githubUrl | String? | GitHub 仓库 URL |
+| language | String? | 主要编程语言 |
+| topics | String[] | 话题标签 |
+| category | Enum | 项目分类 |
+| firstSeenAt | DateTime | 首次发现时间 |
+| lastSeenAt | DateTime | 最后更新时间 |
+| totalOpportunities | Int | 关联机会总数 |
+| status | Enum | ACTIVE / INACTIVE / ARCHIVED |
+
+### 2.4 Opportunity（机会）
+
+| 字段 | 类型 | 说明 | 对用户可见 |
+|------|------|------|-----------|
+| id | UUID | 主键 | — |
+| slug | String (unique) | URL 友好标识 | — |
+| projectId | UUID → Project | 关联项目 | — |
+| title | String | 机会标题 | ✅ 列表 + 详情 |
+| description | Text | 机会描述 | ✅ 详情 |
+| type | Enum | 机会类型（仅4种：免费试用/开源/积分/竞赛） | ✅ 列表（emoji图标） |
+| rewardValue | String? | 奖励描述 | ✅ 详情 |
+| requirements | Text? | 参与条件 | ✅ 详情 |
+| actionUrl | String | CTA 链接 | ✅ 详情 |
+| expiresAt | DateTime? | 过期时间 | ✅ 详情 |
+| riskLevel | Enum | LOW / MEDIUM / HIGH | ❌ 仅后台审核用 |
+| trustScore | Float | 可信度评分 | ❌ 仅后台排序用 |
+| autoPublished | Boolean | 是否自动发布 | ❌ 仅后台 |
+| publishedAt | DateTime? | 发布时间 | ❌ 仅后台 |
+| status | Enum | 状态流转 | ❌ 仅后台 |
+
+### 2.5 Evidence（证据/指标）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| projectId | UUID → Project | 关联项目 |
+| metric | Enum | 指标类型 |
+| value | Float | 指标值 |
+| recordedAt | DateTime | 记录时间 |
+
+指标类型包括：STAR_COUNT、STAR_GROWTH_RATE、FORKS、OPEN_ISSUES、HN_POINTS、HN_COMMENTS、TWITTER_MENTIONS、REDDIT_MENTIONS、PAPER_CITATIONS
+
+### 2.6 AIReview（AI 自动点评）★ 核心差异化
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| projectId | UUID → Project? | 关联项目 |
+| opportunityId | UUID → Opportunity? | 关联机会 |
+| highlights | JSON (string[]) | 3-5 条项目亮点 |
+| suitableFor | String | 适合人群，一句话 |
+| comparisons | JSON | 同类项目对比 [{name, difference}] |
+| totalScore | Float | AI 综合评分 |
+| dimensionScores | JSON | 各维度 {score, explanation} |
+| generatedAt | DateTime | AI 生成时间 |
+| aiModel | String? | 使用的 AI 模型 |
+| adminEdited | Boolean | 管理员是否修改过 |
+| adminNotes | String? | 管理员修改备注 |
+
+### 2.7 ScoreSnapshot（评分快照）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | UUID | 主键 |
+| projectId | UUID → Project | 项目 |
+| opportunityId? | UUID → Opportunity | 机会（可选） |
+| totalScore | Float | 总分 |
+| dimensions | JSON | 各维度评分详情 |
+| calculatedAt | DateTime | 计算时间 |
+
+> **注意**：V1 不含 Creator 和 ScoutCredit 模型。没有用户系统，所有数据由 AI 自动抓取和点评。V2 引入 Scout 系统时再加这两个表。
+
+---
+
+## 三、评分算法
+
+### 3.1 评分维度
+
+| 维度 | 权重 | 子指标 | 说明 |
+|------|------|--------|------|
+| **AI 相关性** | 25% | 项目描述 AI 关键词匹配、语言/框架 AI 关联度 | 确保是 AI 相关项目 |
+| **机会价值** | 25% | 奖励价值等级、机会类型权重 | 免费额度 > 积分 > Bounty |
+| **热度动量** | 20% | Star 增长率、近期讨论量、HN 热榜位置 | 关注上升趋势而非绝对量 |
+| **可信度** | 15% | 来源多样性、GitHub 仓库状态、社区认可度 | 多源验证加分 |
+| **易用性** | 10% | 参与门槛（无需注册 > 需注册 > 需 KYC） | 越低越好 |
+| **时效性** | 5% | 发布时间、机会过期倒计时 | 越新越好 |
+| **风险扣分** | - | 付费要求 -10%、KYC 要求 -15%、单一来源 -10% | 有风险时扣分 |
+
+### 3.2 评分公式
+
+```
+Score = AI_Relevance * 0.25 + Value * 0.25 + Momentum * 0.20
+      + Credibility * 0.15 + Accessibility * 0.10 + Recency * 0.05
+      - Risk_Penalty
+
+其中每个维度归一化到 [0, 100]
+Risk_Penalty = sum(各风险项扣分)
+最终总分范围：[0, 100]
 ```
 
-Component guidance:
+### 3.3 热度动量计算
 
-- Opportunity value: free credits, bounty value, early access value, developer usefulness, or clear upside.
-- Credibility: official source, GitHub quality, docs quality, verified project submission, and source consistency.
-- Momentum: GitHub stars/forks growth, recent commits, launch recency, ProductHunt/HN/Reddit attention where available.
-- Ease: lower effort and clearer steps score higher for opportunity-hunter categories; builder categories can tolerate higher effort.
-- Freshness: new or recently updated opportunities score higher; stale links decay.
-- AI relevance: AI-native products, agent tools, MCP tools, RAG tools, AI DevTools, model/tooling infrastructure.
-- Capped user interest: outbound clicks, saves later, submissions, and reports, capped to avoid manipulation.
-- Capped social proof: useful creator posts, tutorials, benchmarks, community discussions, and project acknowledgements, capped to avoid influencer farming.
-- Risk penalty: unclear rewards, wallet requirements, spam-like tasks, missing official source, suspicious domains, or user reports.
-
-Every public score should expose a plain-language "why ranked" explanation instead of showing only a number.
-
-## Candidate State Machine
-
-```text
-submitted/discovered
-  -> extracted
-  -> deduplicated
-  -> enriched
-  -> scored
-  -> auto_publish OR needs_review
-  -> published OR rejected
-  -> refreshed / expired / archived
+```
+Momentum = log(1 + star_growth_7d) * 10          # Star 增长
+         + log(1 + hn_points_7d) * 5             # HN 热度
+         + log(1 + discussion_count_7d) * 3      # 多平台讨论量
+         * time_decay_factor                      # 时间衰减（越新权重越高）
 ```
 
-State rules:
+---
 
-- `published` items must have source URLs, labels, score explanation, and CTA.
-- `needs_review` items cannot appear in organic top placements until approved.
-- `expired` items can remain visible only if clearly marked as expired or archived.
-- `rejected` items keep internal evidence and rejection reason for abuse prevention and future duplicate checks.
+## 四、数据源策略
 
-## Creator Influence Logic
+### Tier 1 — 自动高频抓取
 
-TuringScout should measure creator/scout contribution separately from organic opportunity ranking.
+| 数据源 | 类型 | 频率 | 说明 |
+|--------|------|------|------|
+| GitHub Trending | API | 每小时 | AI 相关 repos，按 language 过滤 |
+| GitHub Search | API | 每小时 | 关键词搜索（ai, ml, llm, agent 等） |
+| Hacker News /show | API | 每天 4 次 | Show HN AI 相关 |
+| Hugging Face | API | 每天 4 次 | Trending models/spaces |
 
-Directional V1 formula:
+### Tier 2 — 按需补充抓取
 
-```text
-creator_contribution_score =
-  0.30 * content_quality
-+ 0.20 * project_relevance
-+ 0.15 * evidence_usefulness
-+ 0.15 * engagement_quality
-+ 0.10 * consistency
-+ 0.10 * project_acknowledgement
-- spam_or_claim_risk_penalty
+| 数据源 | 类型 | 频率 | 说明 |
+|--------|------|------|------|
+| ProductHunt | API/爬虫 | 每天 2 次 | AI 分类新品 |
+| Reddit r/MachineLearning | API | 每天 2 次 | 热门讨论中的项目 |
+
+> **V1 仅启用 Tier 1 数据源**（GitHub Trending + HN + HuggingFace）。Tier 2 数据源在 V1.5 按需启用。
+
+---
+
+## 五、去重和实体解析
+
+### 5.1 URL 去重
+- 标准化 GitHub URL（去除 trailing slash、.git）
+- 相同 domain+path 视为重复
+
+### 5.2 项目名去重
+- GitHub repo full name 完全匹配 → 同一项目
+- 名称相似度 > 0.85 + 同一语言 → 待人工确认
+- 不同 URL 指向相同 GitHub repo → 合并
+
+### 5.3 机会去重
+- 相同 project + 相同 type + 相同 URL → 合并（更新现有记录）
+
+---
+
+## 六、审核机制
+
+| 风险等级 | 判定条件 | 发布策略 |
+|---------|---------|---------|
+| **低风险** | 免费、开源、多源验证、无 KYC | 自动发布 |
+| **中风险** | 需注册、单一来源、限量 | 抽样审核（30%） |
+| **高风险** | 付费、需 KYC、单一来源 | 全部人工审核 |
+
+> **V1 审核对象**：AI 自动抓取并抽取的候选机会（CANDIDATE），经管理员审核后发布。不接受用户提交。
+
+### 审核状态流转
+
+```
+AI抓取 → 自动抽取 → [自动判定] → 低风险 → 自动发布
+                                 → 中风险 → 审核队列 → 通过/拒绝
+                                 → 高风险 → 审核队列 → 通过/拒绝
+已发布 → 过期 → 自动下架
 ```
 
-Guidance:
+---
 
-- Content quality: original explanation, tutorial, benchmark, comparison, or useful context beats generic reposting.
-- Project relevance: content should clearly map to a real project/opportunity.
-- Evidence usefulness: content links to official sources, GitHub, docs, demos, or reproducible results.
-- Engagement quality: useful replies, project replies, saves, comments, or community discussion matter more than raw likes.
-- Consistency: repeated high-quality discovery or explanation over time.
-- Project acknowledgement: official project reply, repost, correction, or listing update is a strong signal.
-- Risk penalty: low-effort AI slop, copy-paste threads, fake engagement, undisclosed sponsorship, financial advice, or unsupported reward claims.
+## 七、技术选型
 
-V1 can start with manual/admin scoring and visible credit, then automate after enough examples exist.
-
-## Sponsored Policy
-
-Sponsored placements can appear only in labeled modules.
-
-Sponsored status must not improve organic ranking.
-
-Verified badges cannot be bought.
-
-Paid creator campaigns must be labeled separately from organic creator/scout recognition.
-
-## Low-Cost Constraints
-
-Avoid in V1:
-
-- paid X API dependency
-- paid social listening tools
-- proxy-heavy crawling
-- full WeChat/Zhihu crawling
-- reward escrow infrastructure
-- wallet/token systems
-
-Use instead:
-
-- GitHub public data
-- automated source registry
-- optional submitted URLs
-- public pages/RSS where practical
-- internal click data
-- cached AI extraction
-- scheduled jobs / OpenClaw workers
-
-## Agent / OpenClaw Workflow
-
-Minimal agent stack:
-
-1. Source Scout / Discovery agent
-2. Collector agent
-3. Opportunity extraction agent
-4. Entity merge / dedupe agent
-5. GitHub intelligence agent
-6. Website/link graph enrichment agent
-7. Risk and trust agent
-8. Scoring agent
-9. Publishing/digest agent
-10. Outreach/report/cleanup agent
-
-Queue design:
-
-- `raw_evidence_queue`
-- `extraction_queue`
-- `dedupe_queue`
-- `enrichment_queue`
-- `risk_review_queue`
-- `publish_queue`
-- `human_review_queue`
-- `creator_content_queue`
-- `outreach_queue`
-- `report_queue`
-- `cleanup_queue`
-
-Autonomy levels:
-
-- Level 0: manual seed data.
-- Level 1: agents draft, human publishes.
-- Level 2: low-risk/high-confidence items auto-publish.
-- Level 3: agents generate notification/report drafts, human approves sending.
-- Level 4: semi-autonomous growth ops after trust is established.
-
-Daily founder dashboard should show only:
-
-- high-value new opportunities
-- high-risk queue
-- top ranking changes
-- broken/expired links
-- paid/sponsored leads
-- new creator/scout submissions
-- project acknowledgements or repost opportunities
-- daily digest draft
-
-Target human workload:
-
-- Launch/manual seed: 45-90 minutes/day.
-- V1 with admin queue: 20-45 minutes/day.
-- V1.5 with agents and low-risk auto-publish: 10-20 minutes/day plus 1-2 hours/week.
-
-## Admin / Ops Requirements
-
-Admin should be able to:
-
-- review candidate evidence, AI extraction, score components, and risk reasons
-- approve, reject, edit, expire, or merge listings
-- mark source as official/unverified
-- force review for homepage/category top placements
-- label sponsored/featured modules
-- view broken links and stale listings
-- see daily ranking changes and suspicious click/submission patterns
-- approve, reject, hide, or merge creator/scout credits
-- flag low-quality creator content or undisclosed sponsorship
-- generate share cards and outreach drafts for creators/projects
-
-## Analytics Events
-
-Track at minimum:
-
-- `leaderboard_view`
-- `opportunity_impression`
-- `opportunity_detail_view`
-- `outbound_click`
-- `filter_apply`
-- `submit_url`
-- `submit_social_proof`
-- `share_card_click`
-- `creator_credit_view`
-- `project_acknowledgement`
-- `subscribe_submit`
-- `report_issue`
-- `admin_decision`
-
-Required event properties:
-
-- opportunity ID where relevant
-- project ID where relevant
-- category
-- source module
-- CTA type
-- trust/risk labels at click time
-- sponsored/featured flag
-- timestamp
+| 层面 | 选择 | 理由 |
+|------|------|------|
+| 前端框架 | Next.js 15 + React 19 | SSR/SSG 对 SEO 友好 |
+| 样式 | Tailwind CSS | 快速开发，响应式 |
+| 数据库 | PostgreSQL | 关系型数据，JSON 字段支持 |
+| ORM | Prisma | 类型安全，迁移管理 |
+| 缓存 | Redis (可选) | 排行榜缓存，Session |
+| 任务队列 | Inngest / QStash | Cron jobs + 事件驱动 |
+| 部署 | Vercel | Next.js 原生支持 |
+| 监控 | Sentry + Vercel Analytics | 错误追踪和性能监控 |

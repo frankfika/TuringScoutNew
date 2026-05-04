@@ -1,236 +1,184 @@
-# 01 Product Roadmap
+# 01 — 产品路线图
 
-Canonical status: current source of truth for version boundaries and sequencing.
+## 概述
 
+TuringScout 采取渐进式发展策略：先验证数据价值，再构建社区网络，最后引入代币经济。每个版本在上一个版本验证成功后启动。
 
-## Roadmap Logic
+## V0 — 战略和文档沉淀（已完成）
 
-TuringScout should grow in phases:
+**目标**：完成产品定位、市场调研、技术可行性评估
 
-1. Public opportunity leaderboard surface
-2. Evidence/data layer
-3. AI automation and agent ops layer
-4. Social influence/status loop
-5. Adoptionshare attribution layer
-6. Campaign and incentive network
-7. Data/API intelligence layer
-8. Points/access optionality
+**交付物**：
+- 00-10 完整文档体系
+- 竞品分析（CookieDAO、GitHub Trending、Hugging Face 等）
+- 技术可行性验证（GitHub API、HN API 数据可获取性确认）
 
-Strategic rule:
+**不做**：
+- 任何代码开发
+- 任何部署操作
 
-> The leaderboard is the surface. The data layer is the moat. Social status is the growth engine. Adoptionshare and project intelligence are the business model.
+**成功标准**：文档体系完整，逻辑自洽，可作为开发依据
 
-## Version Overview
+---
 
-| Version | Goal | Output |
-| --- | --- | --- |
-| V0 | Align strategy and docs | Clear canonical docs |
-| V1 | Automated public-source AI OPC leaderboards | Public rankings, outbound traffic, and optional scout/creator credit |
-| V1.5 | Automate ops and distribution | Low-touch daily operation and share loops |
-| V2 | Lightweight Adoptionshare attribution | Creator/scout profiles, proof links, reports |
-| V3 | Campaign and reward network | Paid adoption campaigns |
-| V4 | Data/API intelligence | Dashboards, reports, APIs |
-| V5 | Points/access layer | Reputation, access, reward eligibility |
+## V1 — 全自动 AI 项目机会榜
 
-## V0: Strategy Consolidation
+**目标**：上线一个完全由 AI 自动驱动的机会榜单，用户只读浏览。AI 自动抓数据、AI 自动写点评、AI 自动打分。
 
-Goal: create a clear source of truth.
+**核心功能**：
+- 数据自动抓取（GitHub Trending、HN、Hugging Face）
+- AI 信息抽取 + AI 深度点评生成（亮点/适合谁/同类对比/打分解读）
+- 评分排序（多维评分，每维度有 AI 解读）
+- 分类筛选（免费试用、开源项目、积分奖励、奖金竞赛）
+- 项目详情页（GitHub 指标、关联机会）
+- 后台管理（AI抓取审核、点评修改、数据源管理、评分调整）
 
-Deliverables:
+**边界**：
+- 纯只读，无用户系统
+- 不开放用户提交（推迟到 V1.5）
+- 不做社区/UGC
+- 不做个性化推荐
+- 不做付费功能
 
-- canonical docs
-- V1 boundaries
-- V2/V3 separation
-- archive of earlier brainstorming
+**不做**：
+- L2 链部署
+- 创作者内容系统
+- Campaign 系统
+- API 对外开放
+- Scout 提交系统
+- 代币合约
 
-Exit criteria:
+**成功标准**：
+- 100+ AI 项目收录，每条有 AI 自动点评
+- 数据更新延迟 < 1 小时
+- 三方数据源正常运行
 
-- a teammate can tell what belongs in V1 without guessing
+---
 
-## V1: Automated Public-Source AI OPC Leaderboard
+## V1.5 — 自动化运维和分发
 
-Goal: launch a public, low-cost, automation-first leaderboard that helps users discover AI opportunities without login and without requiring the community to submit links.
+**目标**：内容自动生成和分发，降低人工运营成本
 
-Core features:
+**核心功能**：
+- 自动化周报/日报生成
+- SEO 优化（分类页、项目页、标签页）
+- Newsletter 邮件分发
+- 社交媒体自动发布（Twitter Bot、Telegram Channel）
+- 监控和告警（数据源异常、评分异常）
+- **Scout 提交系统引入**（V1.5 首次开放用户提交）
 
-- homepage opportunity leaderboard
-- category leaderboards
-- project pages
-- opportunity pages
-- optional no-login URL submission/correction
-- evidence/source display
-- "spotted by" / contributor credit on listings
-- social proof links from creators, scouts, and community posts
-- shareable ranking cards for projects and creators
-- GitHub metric enrichment
-- AI summaries, tags, risk labels, ranking explanations
-- review queue for risky/high-value/sponsored/top-placement items
-- outbound click tracking
+**不做**：
+- 代币合约
+- 社区功能
 
-Primary data sources:
+**成功标准**：
+- DAU 1000+
+- 周报订阅 500+
+- SEO 流量占比 > 40%
 
-- automated source registry
-- GitHub public data
-- official project websites/docs/blogs
-- Hugging Face public pages
-- HN public search/pages
-- ProductHunt public pages/manual importer
+---
 
-Supplemental data sources:
+## V2 — 创作者赋能和归因
 
-- user-submitted URLs
-- project-submitted URLs
-- scout/creator-submitted social proof
+**目标**：引入内容创作者，构建内容飞轮
 
-Secondary data sources:
+**核心功能**：
+- 创作者内容发布（解读、教程、基准测试）
+- 内容-项目归因链接
+- 创作者排行榜（Top Voices）
+- 分享卡片（社交媒体优化）
+- 内容审核系统
 
-- Reddit public/RSS links
-- Dev.to / public blogs / newsletters with public archives
-- arXiv / Papers with Code for research-to-product signals
+**不做**：
+- 代币合约
+- 付费墙
+- Campaign
 
-Evidence-only sources:
+**成功标准**：
+- 50+ 活跃创作者
+- 外部引用增长 3x
+- 用户停留时长增长 2x
 
-- submitted X links
-- submitted WeChat/Zhihu/Bilibili/Xiaohongshu/Jike links
-- submitted Discord/Telegram announcements
+---
 
-V1 non-goals:
+## V3 — Campaign 和激励网络
 
-- full X API monitoring
-- full WeChat/Zhihu/social crawling
-- wallet/token/reward escrow
-- guaranteed GitHub stars
-- exact global mindshare
-- complex user reputation graph
+**目标**：通过 Campaign 机制激活生态
 
-Success metrics:
+**核心功能**：
+- 项目方 Campaign（Launch Boost、Bounty）
+- Scout 激励计划
+- 创作者激励计划
+- 积分系统升级（为代币做准备）
 
-- 100-300 valid projects/opportunities indexed
-- raw evidence is stored for every published listing
-- 60%+ low-risk listings auto-publish
-- daily human review queue under 20 items
-- weekly leaderboard ships consistently
-- projects optionally submit official links/corrections
-- creators/scouts optionally submit or share useful social proof links
-- projects or creators share ranking cards
-- meaningful outbound clicks to official links
+**不做**：
+- 代币上线交易所
+- DeFi 集成
 
-## V1.5: Automation And Distribution
+**成功标准**：
+- 10+ 项目方 Campaign
+- Scout 贡献者 200+
+- 积分系统运行稳定
 
-Goal: reduce founder workload and make rankings spread through projects, scouts, and creators.
+---
 
-Features:
+## V4 — 数据/API 情报产品
 
-- queue-based agent workflow: discovery, extraction, dedupe, enrichment, risk, publishing, outreach, report, cleanup
-- weekly archive pages
-- AI-generated weekly report drafts
-- Telegram/newsletter digest drafts
-- ranking share cards
-- weekly AI Scouts / Top Voices recognition
-- creator-ready content prompts and project briefing cards
-- project “you ranked this week” notification drafts
-- creator “you helped surface this” notification drafts
-- expired/broken link cleanup
-- founder dashboard
+**目标**：通过 API 和数据产品变现
 
-Success metrics:
+**核心功能**：
+- REST API（项目数据、趋势数据、评分数据）
+- Webhook 通知
+- 企业定制报告
+- 数据导出（CSV、JSON）
+- API 文档和 SDK
 
-- weekly report is 80% AI-generated
-- routine operation takes 10-20 minutes/day
-- outreach drafts need only light editing
-- projects submit corrections or official links
-- creators repost, quote, or explain ranked opportunities
-- project teams acknowledge or repost creator coverage
+**成功标准**：
+- 20+ API 付费客户
+- 企业报告 5+ 份
+- API 可用性 99.9%
 
-## V2: Lightweight Adoptionshare Attribution
+---
 
-Goal: measure who helps AI projects get discovered, understood, tried, and adopted.
+## V5 — 代币/积分经济层
 
-Features:
+**目标**：上线代币经济，完成三层飞轮闭环
 
-- optional login via GitHub/email
-- saved opportunities
-- completed/attempted status
-- proof link submission
-- creator/scout profile
-- Top Voices / AI Scouts leaderboard
-- content evidence pages
-- project claim flow
-- basic project report
-- Adoptionshare V1 score
+**核心功能**：
+- 代币合约部署（ERC-20）
+- 质押解锁高级功能
+- API 调用燃烧代币
+- 治理投票
+- 生态空投
+- 流动性池
 
-Allowed signals:
+**前提条件**：
+- V1-V4 全部验证通过
+- 用户基础 5万+ DAU
+- 合规审查通过
+- 社区治理框架成熟
 
-- outbound clicks
-- submitted proof links
-- submitted/discovered content links
-- creator posts, videos, tutorials, threads, reviews, and benchmarks
-- project acknowledgements/reposts where available
-- GitHub activity correlation
-- project-provided conversion data
-- saves/completions
+**成功标准**：
+- 代币持有地址 10,000+
+- 质押率 > 30%
+- 治理参与率 > 15%
 
-Rule:
+---
 
-- use “correlated lift” unless direct evidence proves attribution
+## 版本依赖关系
 
-## V3: Campaign And Reward Network
+```
+V0 ──→ V1 ──→ V1.5 ──→ V2 ──→ V3 ──→ V4 ──→ V5
+         │                │        │
+         └── 数据飞轮 ────┴── 内容飞轮 ──┴── 代币飞轮
+```
 
-Goal: let projects pay for real adoption campaigns without fake stars or spam.
+## 关键决策点
 
-Campaign types:
-
-- Mindshare: useful content and discussion
-- Buildshare: issues, PRs, docs, examples, MCP integrations
-- Usageshare: API trials, agent sessions, workflow completions
-- Creatorshare: tutorials, benchmarks, comparisons, videos
-- Referralshare: qualified developers, teams, creators, hackathon participants
-
-Guardrails:
-
-- organic rankings cannot be bought
-- sponsored placements must be labeled
-- verified badge cannot be bought
-- no guaranteed GitHub stars
-- no fake reviews or spam posting tasks
-
-## V4: Data/API Intelligence
-
-Goal: productize the adoption intelligence layer.
-
-Products:
-
-- project dashboard
-- category trend reports
-- competitor comparison
-- growth anomaly detection
-- creator/builder impact reports
-- campaign attribution report
-- adoption intelligence API
-- agent-readable project/opportunity data API
-- VC/DevRel intelligence reports
-
-Customers:
-
-- AI project teams
-- DevRel and growth teams
-- creator/influencer teams
-- investors and analysts
-- AI agents/apps that need structured project intelligence
-
-## V5: Points / Access / Token Optionality
-
-Goal: add retention and access rights after the data/campaign network works.
-
-Features:
-
-- Scout Points / Signal Points
-- reputation tiers
-- private alpha feed
-- partner reward eligibility
-- contributor badges
-- early access allocation
-
-Rule:
-
-- do not launch a token until utility, compliance, and anti-abuse controls are proven
+| 里程碑 | 决策点 | 通过条件 |
+|--------|--------|---------|
+| V1 完成后 | 是否继续 V1.5 | DAU > 500，回访率 > 20% |
+| V1.5 完成后 | 是否启动 V2 | DAU > 1000，Scout 提交质量可控 |
+| V2 完成后 | 是否启动 V3 | 创作者 > 50，外部引用 > 100 |
+| V3 完成后 | 是否启动 V4 | 付费意愿验证通过（用户调研） |
+| V4 完成后 | 是否启动 V5 | 监管合规确认，用户基础达标 |
