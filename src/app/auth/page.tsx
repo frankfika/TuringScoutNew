@@ -1,7 +1,0 @@
-import { getCurrentUser } from "@/lib/session";
-
-export default async function AuthPage() {
-  const user = await getCurrentUser();
-  return <section className="container-shell grid min-h-[70vh] place-items-center py-12"><form action="/api/auth/login" method="post" className="glass w-full max-w-lg rounded-[34px] p-8"><p className="text-sm font-black uppercase tracking-[0.24em] text-moss">V2 creator login</p><h1 className="mt-3 text-4xl font-black">Claim your scout profile</h1>{user ? <p className="mt-3 rounded-2xl bg-emerald-100 p-3 text-sm font-bold text-emerald-900">Signed in as {user.email}</p> : null}<Field name="email" label="Email" type="email" required /><Field name="displayName" label="Display name" required /><Field name="handle" label="Public handle" placeholder="alicebuilds" /><button className="mt-6 w-full rounded-full bg-ink px-5 py-4 font-black text-sand">Continue</button><p className="mt-4 text-sm leading-6 text-ink/55">Local V2 auth creates a durable profile cookie. Production can replace this with email magic links without changing profile data.</p></form></section>;
-}
-function Field(props: React.InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }) { const { label, ...inputProps } = props; return <label className="mt-4 block"><span className="text-sm font-black">{label}</span><input {...inputProps} className="mt-1 w-full rounded-2xl border border-ink/10 bg-white/70 px-4 py-3" /></label>; }
