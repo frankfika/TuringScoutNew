@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #141414;
+  --color-canvas: #E4E3E0;
+  --color-canvas-soft: #F2F2F0;
+  --color-canvas-bold: #DCDAD5;
+  --color-canvas-darker: #D1CFCA;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+:root {
+  --color-ink: #141414;
+  --color-canvas: #E4E3E0;
+  --color-canvas-soft: #F2F2F0;
+  --color-canvas-bold: #DCDAD5;
+  --color-canvas-darker: #D1CFCA;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* hidden scrollbar utility used by feed lists */
+.hidden-scrollbar,
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hidden-scrollbar::-webkit-scrollbar,
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* sr-only utility (Tailwind v4 ships it but stay explicit) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-ticker,
+  .animate-scroll-left,
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
+}
