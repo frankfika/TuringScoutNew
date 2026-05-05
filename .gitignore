@@ -9,3 +9,33 @@ dev.db-journal
 prisma/dev.db
 prisma/dev.db-journal
 .vite/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Temporary files
+*.tmp
+*.bak
+*~
+*.swp
+
+# Build artifacts
+build/
+out/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Temporary scripts
+batch-import*.ts
+import-repos*.txt
