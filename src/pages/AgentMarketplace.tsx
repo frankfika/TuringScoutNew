@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useApi } from "../lib/api";
-import { LoadingState } from "../components/ui/LoadingState";
-import { ErrorState } from "../components/ui/ErrorState";
-import { EmptyState } from "../components/ui/EmptyState";
+import { useApi } from "@lib/api";
+import { LoadingState } from "@components/ui/LoadingState";
+import { ErrorState } from "@components/ui/ErrorState";
+import { EmptyState } from "@components/ui/EmptyState";
 
 type AgentItem = {
   id: string;

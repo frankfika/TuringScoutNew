@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { LineChart, Line, XAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { apiFetch, safeJsonParse, useApi } from "../lib/api";
-import { LoadingState } from "../components/ui/LoadingState";
-import { ErrorState } from "../components/ui/ErrorState";
-import { EmptyState } from "../components/ui/EmptyState";
+import { apiFetch, safeJsonParse, useApi } from "@lib/api";
+import { LoadingState } from "@components/ui/LoadingState";
+import { ErrorState } from "@components/ui/ErrorState";
+import { EmptyState } from "@components/ui/EmptyState";
 
 type Opportunity = {
   id: string;

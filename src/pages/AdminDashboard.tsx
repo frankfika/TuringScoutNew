@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ApiError, apiFetch } from "../lib/api";
-import { LoadingState } from "../components/ui/LoadingState";
-import { ErrorState } from "../components/ui/ErrorState";
-import { EmptyState } from "../components/ui/EmptyState";
-import { ConfirmDialog } from "../components/ui/ConfirmDialog";
+import { ApiError, apiFetch } from "@lib/api";
+import { LoadingState } from "@components/ui/LoadingState";
+import { ErrorState } from "@components/ui/ErrorState";
+import { EmptyState } from "@components/ui/EmptyState";
+import { ConfirmDialog } from "@components/ui/ConfirmDialog";
 import { AdminDataManagement } from "./AdminDataManagement";
 
 type Candidate = {

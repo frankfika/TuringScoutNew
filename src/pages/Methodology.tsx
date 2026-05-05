@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useApi } from "../lib/api";
+import { useApi } from "@lib/api";
 
 type HealthInfo = { version?: string; status?: string };
 

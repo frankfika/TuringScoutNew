@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
-import { ApiError, apiFetch } from "../lib/api";
-import { LoadingState } from "../components/ui/LoadingState";
-import { ErrorState } from "../components/ui/ErrorState";
-import { EmptyState } from "../components/ui/EmptyState";
-import { ConfirmDialog } from "../components/ui/ConfirmDialog";
-import { ProjectForm } from "../components/admin/ProjectForm";
-import { OpportunityForm } from "../components/admin/OpportunityForm";
-import { ImportGithub } from "../components/admin/ImportGithub";
+import { ApiError, apiFetch } from "@lib/api";
+import { LoadingState } from "@components/ui/LoadingState";
+import { ErrorState } from "@components/ui/ErrorState";
+import { EmptyState } from "@components/ui/EmptyState";
+import { ConfirmDialog } from "@components/ui/ConfirmDialog";
+import { ProjectForm } from "@components/admin/ProjectForm";
+import { OpportunityForm } from "@components/admin/OpportunityForm";
+import { ImportGithub } from "@components/admin/ImportGithub";
 
 type Project = {
   id: string;

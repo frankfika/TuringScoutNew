@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router-dom";
-import { safeJsonParse, useApi } from "../lib/api";
-import { LoadingState } from "../components/ui/LoadingState";
-import { ErrorState } from "../components/ui/ErrorState";
-import { EmptyState } from "../components/ui/EmptyState";
+import { safeJsonParse, useApi } from "@lib/api";
+import { LoadingState } from "@components/ui/LoadingState";
+import { ErrorState } from "@components/ui/ErrorState";
+import { EmptyState } from "@components/ui/EmptyState";
 
 type AIReview = {
   id: string;

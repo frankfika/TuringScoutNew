@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import { apiFetch } from "../../lib/api";
+import { apiFetch } from "@lib/api";
 
 type ImportResult = {
   repo: string;

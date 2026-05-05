@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { apiFetch } from "../../lib/api";
+import { apiFetch } from "@lib/api";
 
 type TickerItem = {
   id: string;

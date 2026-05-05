@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { apiFetch, ApiError } from "../lib/api";
+import { apiFetch, ApiError } from "@lib/api";
 
 export function AdminLogin() {
   const navigate = useNavigate();
