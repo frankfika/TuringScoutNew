@@ -98,12 +98,13 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
     });
 
     let result: string;
+    let usedEndpoint = false;
     try {
       const url = agent.endpointUrl
         ? `${agent.endpointUrl.replace(/\/$/, "")}${service.endpointPath}`
         : null;
 
-      if (url && url.startsWith("http")) {
+      if (url && url.startsWith("http") && !url.includes("example.com")) {
         console.log(`   → Calling agent endpoint: ${url}`);
         const response = await fetch(url, {
           method: "POST",
@@ -114,37 +115,40 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
           const data = await response.json();
           result = data.result || data.content || data.text || JSON.stringify(data);
           console.log(`   ✅ Agent responded (${result.length} chars)`);
+          usedEndpoint = true;
         } else {
           throw new Error(`Agent returned HTTP ${response.status}`);
         }
-      } else if (ai) {
-        console.log(`   → No agent endpoint, using Gemini fallback`);
-        const prompt = `You are the AI agent "${agent.name}". ${agent.description || ""}
+      }
+    } catch (err: any) {
+      console.log(`   ⚠️  Agent endpoint failed: ${err.message}`);
+    }
+
+    if (!usedEndpoint) {
+      if (ai) {
+        console.log(`   → Using Gemini fallback`);
+        try {
+          const prompt = `You are the AI agent "${agent.name}". ${agent.description || ""}
 The user is using your service "${service.name}". ${service.description || ""}
 
 User message: ${message}
 
 Respond in a helpful, concise way (max 300 words).`;
-        const aiResponse = await ai.models.generateContent({
-          model: "gemini-2.5-pro",
-          contents: prompt,
-        });
-        result = aiResponse.text || "Agent processed your request.";
-        console.log(`   ✅ Gemini responded (${result.length} chars)`);
+          const aiResponse = await ai.models.generateContent({
+            model: "gemini-2.5-pro",
+            contents: prompt,
+          });
+          result = aiResponse.text || "Agent processed your request.";
+          console.log(`   ✅ Gemini responded (${result.length} chars)`);
+        } catch (aiErr: any) {
+          console.error(`   ❌ Gemini failed:`, aiErr.message);
+          result = `Agent ${agent.name} processed: "${message.slice(0, 80)}…"`;
+          console.log(`   ⚠️  Returning placeholder`);
+        }
       } else {
         result = `Agent ${agent.name} processed: "${message.slice(0, 80)}…"`;
         console.log(`   ⚠️  No AI available, returning placeholder`);
       }
-    } catch (err: any) {
-      console.error(`   ❌ Task failed:`, err.message);
-      await prisma.a2ATask.update({
-        where: { id: taskId },
-        data: {
-          status: "failed",
-          artifacts: JSON.stringify([{ type: "text", content: `Error: ${err.message}` }]),
-        },
-      });
-      return;
     }
 
     await prisma.a2ATask.update({
