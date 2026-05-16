@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "@lib/api";
+import { WalletConnect } from "@components/WalletConnect";
 
 type TickerItem = {
   id: string;
@@ -148,6 +149,9 @@ export function SiteHeader() {
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" aria-hidden="true" /> Active
             </span>
           </span>
+          <div className="ml-4 pl-4 border-l border-[#141414]">
+            <WalletConnect />
+          </div>
         </nav>
 
         <button
@@ -202,7 +206,7 @@ export function Footer() {
     <footer className="h-10 border-t border-[#141414] bg-[#DCDAD5] text-[#141414] flex items-center justify-center text-[10px] font-mono uppercase tracking-widest z-40 relative">
       <div className="max-w-[1400px] w-full flex justify-between px-4">
         <div>Sync: Synchronized</div>
-        <div className="animate-pulse opacity-50">Monitoring network…</div>
+        <div className="animate-pulse opacity-50 hidden sm:block">Monitoring network…</div>
         <div>Ver: {version}</div>
       </div>
     </footer>

@@ -338,7 +338,7 @@ export function HomePage() {
       </div>
 
       {/* Tag + Timeframe controls */}
-      <div className="flex flex-col xl:flex-row gap-6 w-full relative z-10">
+      <div className="flex flex-col lg:flex-row gap-6 w-full relative z-10">
         <div className="flex-1 min-w-0 flex flex-col gap-4">
           <div className="flex flex-col gap-4 mb-2">
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#141414] pb-4">
@@ -357,7 +357,7 @@ export function HomePage() {
                       aria-selected={selected}
                       aria-pressed={selected}
                       onClick={() => setActiveTag(tag.id)}
-                      className={`px-3 py-1.5 transition-all duration-200 border border-[#141414] rounded-sm ${
+                      className={`px-2.5 py-1 md:px-3 md:py-1.5 text-[10px] md:text-[11px] transition-all duration-200 border border-[#141414] rounded-sm ${
                         selected
                           ? "bg-[#141414] text-[#E4E3E0] shadow-[2px_2px_0_0_#141414]"
                           : "bg-white text-[#141414] hover:bg-gray-100"
@@ -375,7 +375,7 @@ export function HomePage() {
               <div
                 role="tablist"
                 aria-label="Time range"
-                className="flex bg-[#E4E3E0] p-1 border border-[#141414] rounded-sm text-[10px] font-mono tracking-widest uppercase font-bold shrink-0"
+                className="flex flex-wrap bg-[#E4E3E0] p-1 border border-[#141414] rounded-sm text-[10px] font-mono tracking-widest uppercase font-bold"
               >
                 {TIMEFRAMES.map((tf) => {
                   const selected = activeTimeframe === tf.id;
@@ -405,7 +405,7 @@ export function HomePage() {
             role="region"
             aria-label="Project list"
             aria-busy={projectsApi.loading}
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 flex-1 content-start relative z-10"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 content-start relative z-10"
           >
             {projectsApi.loading ? (
               <div className="col-span-full">
@@ -450,21 +450,21 @@ export function HomePage() {
                         </div>
                       )}
                     </div>
-                    <div className="text-right flex flex-wrap justify-end items-center gap-1">
+                    <div className="text-right flex flex-wrap justify-end items-center gap-1 max-w-[60%]">
                       {project.isHot && (
-                        <div className="px-2 py-1 bg-orange-100 text-orange-800 rounded-sm font-mono text-[10px] font-bold border border-orange-300 flex items-center gap-1 shadow-sm">
+                        <div className="px-1.5 py-0.5 md:px-2 md:py-1 bg-orange-100 text-orange-800 rounded-sm font-mono text-[9px] md:text-[10px] font-bold border border-orange-300 flex items-center gap-1 shadow-sm">
                           <span aria-hidden="true">🔥</span> HOT
                         </div>
                       )}
                       {project.opportunityCount > 0 && (
-                        <div className="px-2 py-1 bg-green-100 text-green-800 rounded-sm font-mono text-[10px] font-bold border border-green-200">
+                        <div className="px-1.5 py-0.5 md:px-2 md:py-1 bg-green-100 text-green-800 rounded-sm font-mono text-[9px] md:text-[10px] font-bold border border-green-200">
                           {project.opportunityCount} {project.opportunityCount === 1 ? "Reward" : "Rewards"}
                         </div>
                       )}
-                      <div className="px-2 py-1 bg-white text-[#141414] rounded-sm font-mono text-[10px] font-bold border border-[#141414] shadow-[1px_1px_0_0_#141414]">
+                      <div className="px-1.5 py-0.5 md:px-2 md:py-1 bg-white text-[#141414] rounded-sm font-mono text-[9px] md:text-[10px] font-bold border border-[#141414] shadow-[1px_1px_0_0_#141414]">
                         KOLs: {project.kols}
                       </div>
-                      <div className="px-2 py-1 bg-[#141414] text-[#E4E3E0] rounded-sm font-mono text-[10px] font-bold border border-[#141414] shadow-[1px_1px_0_0_#141414]">
+                      <div className="px-1.5 py-0.5 md:px-2 md:py-1 bg-[#141414] text-[#E4E3E0] rounded-sm font-mono text-[9px] md:text-[10px] font-bold border border-[#141414] shadow-[1px_1px_0_0_#141414]">
                         Hype: {project.hypeScore}
                       </div>
                     </div>
@@ -528,7 +528,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <aside className="w-full xl:w-[320px] flex-shrink-0 flex flex-col gap-6">
+        <aside className="w-full lg:w-[320px] flex-shrink-0 flex flex-col gap-6">
           <div className="border border-[#141414] bg-white rounded-md shadow-[4px_4px_0_0_#141414] overflow-hidden flex flex-col">
             <div className="p-3 border-b border-[#141414] bg-yellow-100 flex items-center justify-between">
               <span className="font-serif text-[14px] font-bold text-yellow-900 tracking-wide flex items-center gap-2">
