@@ -149,6 +149,35 @@ model AdminSession {
   createdAt DateTime @default(now())
 }
 
+// ── User Session (Blockchain Wallet Login) ────────────────────────────
+model UserSession {
+  id            String   @id @default(uuid())
+  walletAddress String   // Unified wallet address (Solana/EVM/HTX)
+  chain         String   // solana | evm | htx
+  token         String   @unique // Session token
+  nonce         String?  // For signature verification
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([walletAddress])
+  @@index([chain])
+}
+
+model WalletNonce {
+  id            String   @id @default(uuid())
+  walletAddress String
+  chain         String
+  nonce         String   @unique
+  message       String
+  used          Boolean  @default(false)
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([walletAddress, chain])
+  @@index([nonce])
+}
+
 model CommunityPost {
   id          String   @id @default(uuid())
   type        String   // "tweet" | "ai_summary"

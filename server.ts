@@ -20,6 +20,20 @@ import {
   timingSafeCompare,
 } from "./src/server/auth.ts";
 import { verifyOnchainPayment, getWallet } from "./src/server/blockchain.ts";
+import {
+  generateNonce,
+  storeNonce,
+  verifyAndConsumeNonce,
+  verifySolanaSignature,
+  verifyEvmSignature,
+  createWalletSession,
+  getWalletSession,
+  destroyWalletSession,
+  makeRequireWallet,
+  makeOptionalWallet,
+  SESSION_COOKIE_NAME as WALLET_SESSION_COOKIE,
+  makeSessionCookieOptions as makeWalletSessionCookieOptions,
+} from "./src/server/wallet-auth.ts";
 
 const APP_VERSION = "1.0.0";
 const IDEMPOTENCY_WINDOW_MS = 5 * 60 * 1000;
@@ -65,6 +79,8 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
   app.use(express.json({ limit: "100kb" }));
 
   const requireAdmin = makeRequireAdmin(prisma);
+  const requireWallet = makeRequireWallet(prisma);
+  const optionalWallet = makeOptionalWallet(prisma);
 
   // ----- Public health -----
   app.get(
@@ -269,6 +285,87 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
         take: 50,
       });
       res.json(items);
+    }),
+  );
+
+  // ----- Wallet auth (Blockchain Login) -----
+  app.post(
+    "/api/wallet/nonce",
+    asyncHandler(async (req, res) => {
+      const { walletAddress, chain } = req.body || {};
+      if (!walletAddress || !chain) {
+        res.status(400).json({ error: "walletAddress and chain required" });
+        return;
+      }
+      const nonce = generateNonce();
+      const message = `Sign this message to authenticate with TuringScout.\n\nWallet: ${walletAddress}\nChain: ${chain}\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}`;
+      await storeNonce(prisma, walletAddress, chain, nonce, message);
+      res.json({ nonce, message });
+    }),
+  );
+
+  app.post(
+    "/api/wallet/login",
+    asyncHandler(async (req, res) => {
+      const { walletAddress, chain, signature, message } = req.body || {};
+      if (!walletAddress || !chain || !signature || !message) {
+        res.status(400).json({ error: "walletAddress, chain, signature, and message required" });
+        return;
+      }
+
+      // Extract nonce from signed message and verify it
+      const nonceMatch = message.match(/Nonce: ([a-f0-9]{64})/);
+      const nonce = nonceMatch ? nonceMatch[1] : null;
+      if (!nonce) {
+        res.status(400).json({ error: "nonce_missing_from_message" });
+        return;
+      }
+      const nonceCheck = await verifyAndConsumeNonce(prisma, walletAddress, chain, nonce);
+      if (!nonceCheck.ok) {
+        res.status(401).json({ error: nonceCheck.error || "invalid_nonce" });
+        return;
+      }
+
+      let verified = false;
+      if (chain === "solana") {
+        verified = verifySolanaSignature(message, signature, walletAddress);
+      } else if (chain === "evm" || chain === "base" || chain === "ethereum" || chain === "polygon" || chain === "bnb") {
+        verified = await verifyEvmSignature(message, signature, walletAddress);
+      } else {
+        res.status(400).json({ error: `Unsupported chain: ${chain}` });
+        return;
+      }
+
+      if (!verified) {
+        res.status(401).json({ error: "invalid_signature" });
+        return;
+      }
+
+      const { token, expiresAt } = await createWalletSession(prisma, walletAddress, chain);
+      res.cookie(WALLET_SESSION_COOKIE, token, makeWalletSessionCookieOptions(expiresAt));
+      res.json({ ok: true, walletAddress, chain });
+    }),
+  );
+
+  app.post(
+    "/api/wallet/logout",
+    asyncHandler(async (req, res) => {
+      const token = req.cookies?.[WALLET_SESSION_COOKIE];
+      await destroyWalletSession(prisma, token);
+      res.clearCookie(WALLET_SESSION_COOKIE, { path: "/" });
+      res.json({ ok: true });
+    }),
+  );
+
+  app.get(
+    "/api/wallet/me",
+    asyncHandler(async (req, res) => {
+      const session = await getWalletSession(prisma, req.cookies?.[WALLET_SESSION_COOKIE]);
+      if (!session) {
+        res.json({ authenticated: false });
+        return;
+      }
+      res.json({ authenticated: true, walletAddress: session.walletAddress, chain: session.chain });
     }),
   );
 
@@ -695,12 +792,17 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
   // ----- A2A Task lifecycle -----
   app.post(
     "/api/a2a/tasks/send",
+    optionalWallet,
     asyncHandler(async (req, res) => {
       const { agentId, message, serviceId } = req.body || {};
       if (!agentId || typeof message !== "string") {
         res.status(400).json({ error: "agentId and message required" });
         return;
       }
+
+      // Get wallet session if available
+      const wallet = (req as any).wallet as { walletAddress: string; chain: string } | undefined;
+
       const agent = await prisma.agentCard.findUnique({
         where: { id: agentId },
         include: { services: true },
@@ -724,14 +826,19 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
 
       // If target service is paid, return 402 with payment requirements
       if (targetService.priceUsd > 0) {
-        const chain = JSON.parse(targetService.acceptedChains)[0] || "solana";
+        // Prefer user's wallet chain, fallback to service's accepted chains
+        const acceptedChains = JSON.parse(targetService.acceptedChains);
+        const chain = wallet && acceptedChains.includes(wallet.chain)
+          ? wallet.chain
+          : acceptedChains[0] || "solana";
+
         const payee = getWallet(chain);
         const amountToken = String(Math.round(targetService.priceUsd * 1_000_000)); // 6 decimals
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
 
         const payment = await prisma.paymentRequest.create({
           data: {
-            payerAddress: "pending", // will be filled when client retries with payment proof
+            payerAddress: wallet?.walletAddress || "pending",
             payeeAddress: payee,
             chain,
             token: targetService.acceptedToken,
