@@ -74,6 +74,7 @@ export async function verifySolanaPayment(
 ): Promise<{ ok: boolean; error?: string }> {
   try {
     const sig = txHash as TransactionSignature;
+    console.log(`   🔍 Solana: querying tx ${txHash.slice(0, 16)}…`);
     const tx = await solanaConnection.getTransaction(sig, {
       commitment: "confirmed",
       maxSupportedTransactionVersion: 0,
@@ -94,11 +95,14 @@ export async function verifySolanaPayment(
     const postBalance = tx.meta?.postBalances[receiverIdx] ?? 0;
     const received = postBalance - preBalance;
 
+    console.log(`   📊 Payee @ idx ${receiverIdx}: ${preBalance} → ${postBalance} lamports (+${received})`);
+
     const expected = Number(expectedAmountToken);
     if (received < expected) {
       return { ok: false, error: `Insufficient amount: received ${received} lamports, expected ${expected}` };
     }
 
+    console.log(`   ✅ Solana verification passed`);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: String(err) };
@@ -134,6 +138,7 @@ export async function verifyEvmPayment(
       transport: http(config.rpc),
     });
 
+    console.log(`   🔍 ${config.name}: querying receipt for ${txHash.slice(0, 16)}…`);
     const receipt = await client.getTransactionReceipt({ hash: txHash as `0x${string}` });
     if (!receipt) return { ok: false, error: "Transaction not found" };
     if (receipt.status !== "success") return { ok: false, error: "Transaction failed or not confirmed" };
@@ -142,21 +147,21 @@ export async function verifyEvmPayment(
     const expectedAmount = BigInt(expectedAmountToken);
     const usdcLower = config.usdc.toLowerCase();
 
-    for (const log of receipt.logs as any[]) {
-      // Filter: must be from the USDC contract and match Transfer event signature
-      if (log.address.toLowerCase() !== usdcLower) continue;
-      if (log.topics[0]?.toLowerCase() !== TRANSFER_TOPIC) continue;
+    const usdcLogs = (receipt.logs as any[]).filter(
+      (log) => log.address.toLowerCase() === usdcLower && log.topics[0]?.toLowerCase() === TRANSFER_TOPIC,
+    );
+    console.log(`   📊 Found ${usdcLogs.length} USDC Transfer log(s)`);
 
-      // ERC-20 Transfer indexed args: topics[1] = from, topics[2] = to
+    for (const log of usdcLogs) {
       const toTopic = log.topics[2];
       if (!toTopic) continue;
       const toAddress = ("0x" + toTopic.slice(-40)).toLowerCase();
+      const amount = BigInt(log.data);
+      console.log(`      → to: ${toAddress.slice(0, 12)}… | amount: ${amount}`);
 
-      if (toAddress === expectedPayeeLower) {
-        const amount = BigInt(log.data);
-        if (amount >= expectedAmount) {
-          return { ok: true };
-        }
+      if (toAddress === expectedPayeeLower && amount >= expectedAmount) {
+        console.log(`   ✅ EVM verification passed on ${config.name}`);
+        return { ok: true };
       }
     }
 

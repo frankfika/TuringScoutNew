@@ -82,6 +82,81 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
   const requireWallet = makeRequireWallet(prisma);
   const optionalWallet = makeOptionalWallet(prisma);
 
+  // ----- A2A Task Execution (real agent calls) -----
+  async function executeA2ATask(
+    taskId: string,
+    message: string,
+    agent: { id: string; name: string; endpointUrl: string | null; description: string | null },
+    service: { name: string; endpointPath: string; description: string | null },
+  ) {
+    console.log(`\n🤖 [A2A] Task ${taskId.slice(0, 8)}… started for "${agent.name}" / ${service.name}`);
+    console.log(`   Message: "${message.slice(0, 60)}…"`);
+
+    await prisma.a2ATask.update({
+      where: { id: taskId },
+      data: { status: "working" },
+    });
+
+    let result: string;
+    try {
+      const url = agent.endpointUrl
+        ? `${agent.endpointUrl.replace(/\/$/, "")}${service.endpointPath}`
+        : null;
+
+      if (url && url.startsWith("http")) {
+        console.log(`   → Calling agent endpoint: ${url}`);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, service: service.name }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          result = data.result || data.content || data.text || JSON.stringify(data);
+          console.log(`   ✅ Agent responded (${result.length} chars)`);
+        } else {
+          throw new Error(`Agent returned HTTP ${response.status}`);
+        }
+      } else if (ai) {
+        console.log(`   → No agent endpoint, using Gemini fallback`);
+        const prompt = `You are the AI agent "${agent.name}". ${agent.description || ""}
+The user is using your service "${service.name}". ${service.description || ""}
+
+User message: ${message}
+
+Respond in a helpful, concise way (max 300 words).`;
+        const aiResponse = await ai.models.generateContent({
+          model: "gemini-2.5-pro",
+          contents: prompt,
+        });
+        result = aiResponse.text || "Agent processed your request.";
+        console.log(`   ✅ Gemini responded (${result.length} chars)`);
+      } else {
+        result = `Agent ${agent.name} processed: "${message.slice(0, 80)}…"`;
+        console.log(`   ⚠️  No AI available, returning placeholder`);
+      }
+    } catch (err: any) {
+      console.error(`   ❌ Task failed:`, err.message);
+      await prisma.a2ATask.update({
+        where: { id: taskId },
+        data: {
+          status: "failed",
+          artifacts: JSON.stringify([{ type: "text", content: `Error: ${err.message}` }]),
+        },
+      });
+      return;
+    }
+
+    await prisma.a2ATask.update({
+      where: { id: taskId },
+      data: {
+        status: "completed",
+        artifacts: JSON.stringify([{ type: "text", content: result }]),
+      },
+    });
+    console.log(`   🎉 Task ${taskId.slice(0, 8)}… completed\n`);
+  }
+
   // ----- Public health -----
   app.get(
     "/api/health",
@@ -836,8 +911,18 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
         const amountToken = String(Math.round(targetService.priceUsd * 1_000_000)); // 6 decimals
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
 
+        // Create task first (awaiting payment)
+        const task = await prisma.a2ATask.create({
+          data: {
+            agentId,
+            status: "awaiting_payment",
+            messages: JSON.stringify([{ role: "user", parts: [{ text: message }] }]),
+          },
+        });
+
         const payment = await prisma.paymentRequest.create({
           data: {
+            taskId: task.id,
             payerAddress: wallet?.walletAddress || "pending",
             payeeAddress: payee,
             chain,
@@ -853,6 +938,7 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
         res.status(402).json({
           error: "payment_required",
           paymentId: payment.id,
+          taskId: task.id,
           requirements: {
             chain,
             token: targetService.acceptedToken,
@@ -870,7 +956,7 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
         return;
       }
 
-      // Free service — create task directly
+      // Free service — create task and execute immediately
       const task = await prisma.a2ATask.create({
         data: {
           agentId,
@@ -879,18 +965,8 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
         },
       });
 
-      // Simulate async processing
-      setTimeout(async () => {
-        await prisma.a2ATask.update({
-          where: { id: task.id },
-          data: {
-            status: "completed",
-            artifacts: JSON.stringify([
-              { type: "text", content: `Agent ${agent.name} processed: "${message.slice(0, 80)}..."` },
-            ]),
-          },
-        });
-      }, 3000);
+      // Execute asynchronously (real agent call or Gemini fallback)
+      executeA2ATask(task.id, message, agent, targetService).catch(console.error);
 
       res.status(202).json({ taskId: task.id, status: "submitted" });
     }),
@@ -1000,23 +1076,37 @@ export function createApp(prisma: PrismaClient, ai: GoogleGenAI | null) {
         return;
       }
 
+      console.log(`\n💰 [x402] Verifying payment ${paymentId.slice(0, 8)}… on ${payment.chain}`);
+      console.log(`   Tx: ${txHash.slice(0, 20)}… | Expected: ${payment.amountToken} ${payment.token} → ${payment.payeeAddress.slice(0, 12)}…`);
+
       const verify = await verifyOnchainPayment(txHash, payment.chain, payment.payeeAddress, payment.amountToken || "0");
       if (!verify.ok) {
+        console.log(`   ❌ Verification failed: ${verify.error}`);
         res.status(402).json({ error: "Payment verification failed", detail: verify.error });
         return;
       }
+      console.log(`   ✅ On-chain verification passed\n`);
 
       const updated = await prisma.paymentRequest.update({
         where: { id: paymentId },
         data: { status: "CONFIRMED", txHash, confirmedAt: new Date() },
       });
 
-      // If payment was for an A2A task, create/complete the task
+      // If payment was for an A2A task, execute it
       if (payment.taskId) {
-        await prisma.a2ATask.update({
+        const task = await prisma.a2ATask.findUnique({
           where: { id: payment.taskId },
-          data: { status: "completed" },
+          include: { agent: { include: { services: true } } },
         });
+        if (task) {
+          const service = task.agent?.services[0];
+          if (task.agent && service) {
+            const userMessage = safeJsonParse(task.messages, []).find((m: any) => m.role === "user")?.parts?.[0]?.text || "";
+            executeA2ATask(task.id, userMessage, task.agent, service).catch(console.error);
+          } else {
+            await prisma.a2ATask.update({ where: { id: task.id }, data: { status: "completed" } });
+          }
+        }
       }
 
       res.json({ success: true, payment: updated });
