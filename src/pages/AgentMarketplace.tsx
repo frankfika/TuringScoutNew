@@ -15,7 +15,6 @@ type AgentItem = {
   status: string;
   walletSolana: string | null;
   walletEvm: string | null;
-  walletHtx: string | null;
   capabilities: string;
   project: { slug: string; name: string } | null;
   createdAt: string;
@@ -42,7 +41,7 @@ export function AgentMarketplace() {
             <div>
               <h1 className="font-serif font-bold text-2xl text-[#141414]">Agent Marketplace</h1>
               <p className="text-sm opacity-60 mt-1 font-mono">
-                Discover A2A-enabled agents. Pay with Solana, EVM, or HTX via x402.
+                Discover A2A-enabled agents. Pay with Solana or EVM via x402.
               </p>
             </div>
             <div className="text-[10px] font-mono uppercase tracking-widest opacity-50 border border-[#141414] px-3 py-1 bg-[#F2F2F0]">
@@ -117,12 +116,6 @@ export function AgentMarketplace() {
                       <span className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                         EVM
-                      </span>
-                    )}
-                    {agent.walletHtx && (
-                      <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                        HTX
                       </span>
                     )}
                   </div>

@@ -1134,7 +1134,7 @@ Respond in a helpful, concise way (max 300 words).`;
     "/api/admin/agents",
     requireAdmin,
     asyncHandler(async (req, res) => {
-      const { name, description, endpointUrl, projectId, walletSolana, walletEvm, walletHtx, capabilities } = req.body || {};
+      const { name, description, endpointUrl, projectId, walletSolana, walletEvm, capabilities } = req.body || {};
       if (!name || !endpointUrl) {
         res.status(400).json({ error: "name and endpointUrl required" });
         return;
@@ -1147,7 +1147,6 @@ Respond in a helpful, concise way (max 300 words).`;
           projectId: projectId || null,
           walletSolana: walletSolana ? String(walletSolana) : null,
           walletEvm: walletEvm ? String(walletEvm) : null,
-          walletHtx: walletHtx ? String(walletHtx) : null,
           capabilities: JSON.stringify(capabilities || []),
         },
       });

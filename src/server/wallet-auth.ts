@@ -1,6 +1,6 @@
 /**
  * Blockchain wallet authentication for TuringScout
- * Supports Solana, EVM (Base/Ethereum), and HTX (Huobi Chain)
+ * Supports Solana and EVM (Base / Ethereum / Polygon / BNB Chain)
  */
 
 import crypto from "node:crypto";
@@ -92,7 +92,7 @@ export function verifySolanaSignature(
 }
 
 /**
- * Verify EVM/HTX wallet signature
+ * Verify EVM wallet signature
  */
 export async function verifyEvmSignature(
   message: string,

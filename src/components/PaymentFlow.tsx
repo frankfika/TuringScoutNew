@@ -29,7 +29,7 @@ export function PaymentFlow({ paymentId, requirements, onSuccess, onCancel }: Pa
     try {
       if (requirements.chain === "solana") {
         await paySolana();
-      } else if (requirements.chain === "evm" || requirements.chain === "htx") {
+      } else if (requirements.chain === "evm" || requirements.chain === "base" || requirements.chain === "ethereum" || requirements.chain === "polygon" || requirements.chain === "bnb") {
         await payEVM();
       } else {
         throw new Error(`Unsupported chain: ${requirements.chain}`);

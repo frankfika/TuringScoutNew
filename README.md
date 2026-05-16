@@ -14,6 +14,8 @@
 
 [核心功能](#核心功能) · [界面导览](#界面导览) · [快速开始](#快速开始) · [Demo 流程](#demo-流程) · [技术架构](#技术架构)
 
+__简体中文__ | [English](./README_EN.md)
+
 ---
 
 </div>
@@ -68,6 +70,8 @@
 - **Solana 验证**: 校验 lamport balance change
 - **Nonce 防重放**: Wallet 登录使用一次性 nonce，5 分钟过期，签名后即刻销毁
 
+![Agent 详情 + x402 支付](./docs/assets/agent-detail.png)
+
 ### 5. 区块链钱包登录
 无需用户名密码，用钱包签名即可登录：
 
@@ -87,6 +91,10 @@
 | 首页 | 项目详情 | Agent 市场 |
 |------|---------|-----------|
 | ![首页](./docs/assets/home.png) | ![项目详情](./docs/assets/project-detail.png) | ![Agent 市场](./docs/assets/agent-marketplace.png) |
+
+| Agent 详情 | 方法论 | 管理后台 |
+|-----------|--------|---------|
+| ![Agent 详情](./docs/assets/agent-detail.png) | ![方法论](./docs/assets/methodology.png) | ![管理后台](./docs/assets/admin-dashboard.png) |
 
 ## 快速开始
 
@@ -154,8 +162,6 @@ BNB_RPC="https://bsc-dataseed.binance.org"
 ### 管理员访问
 
 访问 `http://localhost:3000/admin` 并使用 `.env` 中配置的 `ADMIN_PASSWORD` 登录。
-
-![管理员登录](./docs/assets/admin-dashboard.png)
 
 ## Demo 流程
 
@@ -299,6 +305,18 @@ npx tsx scheduler.ts
 - Community Feed: 每 15 分钟
 
 > 开发模式下只启动 `npm run dev` 即可，scheduler 可单独运行。
+
+## 截图生成
+
+```bash
+# 1. 确保应用已在运行
+npm run dev
+
+# 2. 运行截图脚本
+node scripts/capture-screenshots.mjs
+
+# 截图将保存到 docs/assets/
+```
 
 ## 许可证
 
