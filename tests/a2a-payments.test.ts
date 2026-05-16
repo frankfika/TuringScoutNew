@@ -109,11 +109,12 @@ async function findAgentWithFreeService(): Promise<string | null> {
   return null;
 }
 
-async function findAgentWithPaidService(): Promise<string | null> {
+async function findAgentWithPaidService(): Promise<{ agentId: string; serviceId: string } | null> {
   const agents = await api<{ id: string }[]>("/api/agents");
   for (const a of agents.body) {
-    const svcs = await api<{ priceUsd: number }[]>(`/api/agents/${a.id}/services`);
-    if (svcs.body.some((s) => s.priceUsd > 0)) return a.id;
+    const svcs = await api<{ id: string; priceUsd: number }[]>(`/api/agents/${a.id}/services`);
+    const paid = svcs.body.find((s) => s.priceUsd > 0);
+    if (paid) return { agentId: a.id, serviceId: paid.id };
   }
   return null;
 }
@@ -146,10 +147,11 @@ describe("A2A Task lifecycle", () => {
   });
 
   test("POST /api/a2a/tasks/send for paid service returns 402 with requirements", async () => {
-    const paidAgentId = await findAgentWithPaidService();
-    if (!paidAgentId) return; // skip if none seeded
+    const paid = await findAgentWithPaidService();
+    if (!paid) return; // skip if none seeded
     const r = await postJson<{ error: string; paymentId: string; requirements: unknown }>("/api/a2a/tasks/send", {
-      agentId: paidAgentId,
+      agentId: paid.agentId,
+      serviceId: paid.serviceId,
       message: "Paid request",
     });
     assert.equal(r.status, 402);
