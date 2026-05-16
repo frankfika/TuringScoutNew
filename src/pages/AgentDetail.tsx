@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useApi } from "@lib/api";
 import { LoadingState } from "@components/ui/LoadingState";
 import { ErrorState } from "@components/ui/ErrorState";
 import { EmptyState } from "@components/ui/EmptyState";
+import { PaymentFlow } from "@components/PaymentFlow";
 
 type AgentDetailData = {
   id: string;
@@ -15,7 +16,6 @@ type AgentDetailData = {
   status: string;
   walletSolana: string | null;
   walletEvm: string | null;
-  walletHtx: string | null;
   capabilities: string;
   project: { slug: string; name: string } | null;
   services: Array<{
@@ -53,8 +53,48 @@ export function AgentDetail() {
 
   const [taskLoading, setTaskLoading] = useState(false);
   const [taskResult, setTaskResult] = useState<TaskResponse | null>(null);
+  const [taskArtifacts, setTaskArtifacts] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [walletConnected, setWalletConnected] = useState(false);
+
+  // Check wallet connection status
+  useEffect(() => {
+    async function checkWallet() {
+      try {
+        const res = await fetch("/api/wallet/me");
+        const data = await res.json();
+        setWalletConnected(data.authenticated);
+      } catch {
+        setWalletConnected(false);
+      }
+    }
+    checkWallet();
+  }, []);
+
+  // Poll task status
+  useEffect(() => {
+    if (!taskResult?.taskId) return;
+    if (taskResult.status === "completed" || taskResult.status === "failed") return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/a2a/tasks/${taskResult.taskId}`);
+        const data = await res.json();
+        if (data.status === "completed" || data.status === "failed") {
+          setTaskResult((prev) => (prev ? { ...prev, status: data.status } : prev));
+          setTaskArtifacts(data.artifacts || []);
+          clearInterval(interval);
+        } else if (data.status === "working") {
+          setTaskResult((prev) => (prev ? { ...prev, status: data.status } : prev));
+        }
+      } catch {
+        // ignore polling errors
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [taskResult?.taskId, taskResult?.status]);
 
   async function sendTask() {
     if (!message.trim() || !id) return;
@@ -166,9 +206,21 @@ export function AgentDetail() {
 
           {/* Interaction panel */}
           <section className="bg-white border border-[#141414] shadow-[4px_4px_0_0_#141414] rounded-sm p-5">
-            <h2 className="font-mono text-[10px] uppercase tracking-widest font-bold mb-3 opacity-70">
-              Send Task (A2A)
-            </h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-mono text-[10px] uppercase tracking-widest font-bold opacity-70">
+                Send Task (A2A)
+              </h2>
+              {walletConnected ? (
+                <span className="text-[10px] font-mono bg-green-100 text-green-800 border border-green-300 px-2 py-0.5 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  Wallet Connected
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono bg-yellow-100 text-yellow-800 border border-yellow-300 px-2 py-0.5">
+                  Connect wallet for paid services
+                </span>
+              )}
+            </div>
             <div className="space-y-3">
               <textarea
                 value={message}
@@ -186,48 +238,56 @@ export function AgentDetail() {
               </button>
             </div>
 
-            {taskResult?.status === "payment_required" && taskResult.requirements && (
-              <div className="mt-4 border border-orange-300 bg-orange-50 rounded-sm p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-mono font-bold bg-orange-200 text-orange-800 px-2 py-0.5">
-                    402 PAYMENT REQUIRED
-                  </span>
+            {taskResult?.status === "payment_required" && taskResult.requirements && taskResult.paymentId && (
+              <PaymentFlow
+                paymentId={taskResult.paymentId}
+                requirements={taskResult.requirements}
+                onSuccess={() => {
+                  setTaskResult((prev) => (prev ? { ...prev, status: "submitted" } : { status: "submitted" }));
+                  setMessage("");
+                }}
+                onCancel={() => {
+                  setTaskResult(null);
+                  setTaskArtifacts([]);
+                }}
+              />
+            )}
+
+            {(taskResult?.status === "submitted" || taskResult?.status === "awaiting_payment") && (
+              <div className="mt-4 border border-blue-300 bg-blue-50 rounded-sm p-4">
+                <div className="text-sm font-mono text-blue-800 flex items-center gap-2">
+                  <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  Task {taskResult.taskId?.slice(0, 8)}… {taskResult.status === "awaiting_payment" ? "awaiting payment" : "submitted"}
                 </div>
-                <div className="text-sm space-y-1 font-mono">
-                  <div className="flex justify-between">
-                    <span className="opacity-60">Amount</span>
-                    <span className="font-bold">
-                      ${taskResult.requirements.amountUsd} {taskResult.requirements.token}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="opacity-60">Chain</span>
-                    <span className="font-bold">{taskResult.requirements.chain.toUpperCase()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="opacity-60">Payee</span>
-                    <span className="font-bold truncate max-w-[200px]">{taskResult.requirements.payee}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="opacity-60">Expires</span>
-                    <span>{new Date(taskResult.requirements.expiresAt).toLocaleTimeString()}</span>
-                  </div>
-                </div>
-                <p className="text-[10px] opacity-50 mt-2">
-                  Pay on-chain, then submit txHash to /api/payments/verify with paymentId{" "}
-                  {taskResult.paymentId}
-                </p>
               </div>
             )}
 
-            {taskResult?.status === "submitted" && (
-              <div className="mt-4 border border-green-300 bg-green-50 rounded-sm p-4">
-                <div className="text-sm font-mono text-green-800">
-                  Task submitted! ID: <span className="font-bold">{taskResult.taskId}</span>
+            {taskResult?.status === "working" && (
+              <div className="mt-4 border border-yellow-300 bg-yellow-50 rounded-sm p-4">
+                <div className="text-sm font-mono text-yellow-800 flex items-center gap-2">
+                  <div className="w-3 h-3 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin" />
+                  Agent is working on your task…
                 </div>
-                <p className="text-[10px] opacity-50 mt-1">
-                  Poll <code>/api/a2a/tasks/{taskResult.taskId}</code> for status.
-                </p>
+              </div>
+            )}
+
+            {taskResult?.status === "completed" && (
+              <div className="mt-4 border border-green-300 bg-green-50 rounded-sm p-4 space-y-3">
+                <div className="text-sm font-mono text-green-800 flex items-center gap-2">
+                  <span>✅</span>
+                  <span>Task completed! ID: {taskResult.taskId?.slice(0, 8)}…</span>
+                </div>
+                {taskArtifacts.map((art, i) => (
+                  <div key={i} className="bg-white border border-green-200 rounded-sm p-3 text-sm whitespace-pre-wrap">
+                    {art.content}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {taskResult?.status === "failed" && (
+              <div className="mt-4 border border-red-300 bg-red-50 rounded-sm p-4 text-sm text-red-800">
+                <span>❌</span> Task failed
               </div>
             )}
 
